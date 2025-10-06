@@ -3,7 +3,7 @@
 
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=VALUE
     driver-class-name: org.h2.Driver
     username: sa
     password: 
@@ -25,7 +25,7 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema.sql
+      # 开发环境不执行 schema.sql，交给 JPA ddl-auto 管理
       data-locations: classpath:data.sql
       continue-on-error: false
 

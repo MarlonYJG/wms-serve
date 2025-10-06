@@ -33,10 +33,10 @@ public class HomeController {
         
         // API文档链接
         Map<String, String> links = new HashMap<>();
-        links.put("users", "/api/users");
-        links.put("products", "/api/products");
-        links.put("warehouses", "/api/warehouses");
-        links.put("health", "/api/health");
+        links.put("users", "/api/v1/users");
+        links.put("products", "/api/v1/products");
+        links.put("warehouses", "/api/v1/warehouses");
+        links.put("health", "/api/v1/health");
         response.put("links", links);
         
         return response;

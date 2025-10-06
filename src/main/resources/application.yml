@@ -5,7 +5,7 @@
 server:
   port: 8080  # 应用端口
   servlet:
-    context-path: /api  # API路径前缀
+    context-path: /api/v1  # API路径前缀
 
 # Spring配置
 spring:
@@ -16,7 +16,7 @@ spring:
   # 数据源配置
   datasource:
     # 开发环境使用H2内存数据库（便于快速开发）
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=VALUE
     driver-class-name: org.h2.Driver
     username: sa
     password: 
@@ -44,12 +44,7 @@ spring:
       enabled: true
       path: /h2-console
   
-  # 安全配置
-  security:
-    user:
-      name: admin
-      password: admin123
-      roles: ADMIN
+  # 安全配置：删除默认用户，使用自定义 SecurityConfig 放行策略
 
 # 日志配置
 logging:

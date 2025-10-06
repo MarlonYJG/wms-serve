@@ -2,6 +2,7 @@ package com.bj.wms.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -39,8 +40,8 @@ public class SecurityConfig {
             
             // 配置授权规则（注意：这里的匹配路径不包含 context-path /api）
             .authorizeHttpRequests(authz -> authz
-                // 允许访问首页和健康检查接口
-                .requestMatchers("/", "/health").permitAll()
+                // 允许访问首页和健康检查接口（在 context-path 去除后匹配）
+                .requestMatchers(HttpMethod.GET, "/", "/health").permitAll()
 
                 // 允许访问H2数据库控制台（仅开发环境）
                 .requestMatchers("/h2-console/**").permitAll()

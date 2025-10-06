@@ -116,8 +116,8 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 ### 4. 访问应用
 
-- 应用地址：http://localhost:8080/api
-- 健康检查：http://localhost:8080/api/health
+- 应用地址：http://localhost:8080/api/v1
+- 健康检查：http://localhost:8080/api/v1/health
 - H2控制台：http://localhost:8080/h2-console（仅开发环境）
 
 ## 📚 API文档
@@ -126,57 +126,57 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
-| GET | `/api/` | 系统首页 |
-| GET | `/api/health` | 健康检查 |
+| GET | `/api/v1/` | 系统首页 |
+| GET | `/api/v1/health` | 健康检查 |
 
 ### 用户管理
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
-| POST | `/api/users` | 创建用户 |
-| GET | `/api/users` | 获取用户列表 |
-| GET | `/api/users/{id}` | 获取用户详情 |
-| GET | `/api/users/username/{username}` | 根据用户名获取用户 |
-| GET | `/api/users/search` | 搜索用户 |
-| GET | `/api/users/role/{role}` | 根据角色获取用户 |
-| PUT | `/api/users/{id}` | 更新用户信息 |
-| PUT | `/api/users/{id}/password` | 修改密码 |
-| DELETE | `/api/users/{id}` | 删除用户 |
+| POST | `/api/v1/users` | 创建用户 |
+| GET | `/api/v1/users` | 获取用户列表 |
+| GET | `/api/v1/users/{id}` | 获取用户详情 |
+| GET | `/api/v1/users/username/{username}` | 根据用户名获取用户 |
+| GET | `/api/v1/users/search` | 搜索用户 |
+| GET | `/api/v1/users/role/{role}` | 根据角色获取用户 |
+| PUT | `/api/v1/users/{id}` | 更新用户信息 |
+| PUT | `/api/v1/users/{id}/password` | 修改密码 |
+| DELETE | `/api/v1/users/{id}` | 删除用户 |
 
 ### 商品管理
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
-| POST | `/api/products` | 创建商品 |
-| GET | `/api/products` | 获取商品列表 |
-| GET | `/api/products/{id}` | 获取商品详情 |
-| GET | `/api/products/code/{productCode}` | 根据编码获取商品 |
-| GET | `/api/products/search` | 搜索商品 |
-| GET | `/api/products/category/{category}` | 根据分类获取商品 |
-| GET | `/api/products/brand/{brand}` | 根据品牌获取商品 |
-| GET | `/api/products/low-stock` | 获取库存不足商品 |
-| GET | `/api/products/over-stock` | 获取库存过多商品 |
-| PUT | `/api/products/{id}` | 更新商品信息 |
-| PUT | `/api/products/{id}/stock` | 更新库存 |
-| PUT | `/api/products/{id}/stock/increase` | 增加库存 |
-| PUT | `/api/products/{id}/stock/decrease` | 减少库存 |
-| DELETE | `/api/products/{id}` | 删除商品 |
+| POST | `/api/v1/products` | 创建商品 |
+| GET | `/api/v1/products` | 获取商品列表 |
+| GET | `/api/v1/products/{id}` | 获取商品详情 |
+| GET | `/api/v1/products/code/{productCode}` | 根据编码获取商品 |
+| GET | `/api/v1/products/search` | 搜索商品 |
+| GET | `/api/v1/products/category/{category}` | 根据分类获取商品 |
+| GET | `/api/v1/products/brand/{brand}` | 根据品牌获取商品 |
+| GET | `/api/v1/products/low-stock` | 获取库存不足商品 |
+| GET | `/api/v1/products/over-stock` | 获取库存过多商品 |
+| PUT | `/api/v1/products/{id}` | 更新商品信息 |
+| PUT | `/api/v1/products/{id}/stock` | 更新库存 |
+| PUT | `/api/v1/products/{id}/stock/increase` | 增加库存 |
+| PUT | `/api/v1/products/{id}/stock/decrease` | 减少库存 |
+| DELETE | `/api/v1/products/{id}` | 删除商品 |
 
 ### 仓库管理
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
-| POST | `/api/warehouses` | 创建仓库 |
-| GET | `/api/warehouses` | 获取仓库列表 |
-| GET | `/api/warehouses/{id}` | 获取仓库详情 |
-| GET | `/api/warehouses/code/{warehouseCode}` | 根据编码获取仓库 |
-| GET | `/api/warehouses/search` | 搜索仓库 |
-| GET | `/api/warehouses/active` | 获取启用仓库 |
-| GET | `/api/warehouses/high-usage` | 获取高使用率仓库 |
-| PUT | `/api/warehouses/{id}` | 更新仓库信息 |
-| PUT | `/api/warehouses/{id}/capacity` | 更新使用容量 |
-| GET | `/api/warehouses/{id}/usage-rate` | 计算使用率 |
-| DELETE | `/api/warehouses/{id}` | 删除仓库 |
+| POST | `/api/v1/warehouses` | 创建仓库 |
+| GET | `/api/v1/warehouses` | 获取仓库列表 |
+| GET | `/api/v1/warehouses/{id}` | 获取仓库详情 |
+| GET | `/api/v1/warehouses/code/{warehouseCode}` | 根据编码获取仓库 |
+| GET | `/api/v1/warehouses/search` | 搜索仓库 |
+| GET | `/api/v1/warehouses/active` | 获取启用仓库 |
+| GET | `/api/v1/warehouses/high-usage` | 获取高使用率仓库 |
+| PUT | `/api/v1/warehouses/{id}` | 更新仓库信息 |
+| PUT | `/api/v1/warehouses/{id}/capacity` | 更新使用容量 |
+| GET | `/api/v1/warehouses/{id}/usage-rate` | 计算使用率 |
+| DELETE | `/api/v1/warehouses/{id}` | 删除仓库 |
 
 ## 🔧 配置说明
 
