@@ -1,0 +1,88 @@
+---
+alwaysApply: true
+---
+name: WMS Backend (Spring Boot) - Cursor 项目规则
+
+about:
+  - 本项目为基于 Spring Boot 3 的仓库管理系统后端（Java 21，Maven）。
+  - 包名与组织标识统一为 `com.bj.wms`，Maven groupId 为 `com.bj`。
+
+goals:
+  - 保持清晰、可维护、可测试的分层架构：Controller → Service → Repository → Entity。
+  - 提供稳定一致的 REST API 与统一错误响应。
+  - 面向前端开发者的易用性：简单入手、最小学习曲线。
+
+conventions:
+  language:
+    - Java 21，尽量使用清晰易懂的命名与高可读性实现。
+    - 严禁使用 1–2 字母的短变量名，避免 `any`/未经审查的原始类型转换。
+  packages:
+    - 统一包路径：`com.bj.wms` 下按模块划分：`controller`/`service`/`repository`/`entity`/`config`/`exception`/`util`。
+  spring:
+    - Controller 仅做参数接收与响应；业务逻辑写在 Service；数据访问写在 Repository。
+    - 写操作在 Service 使用 `@Transactional`；查询默认只读或无需事务。
+  validation:
+    - 使用 `jakarta.validation`（如 `@NotBlank`、`@Size`）+ `@Valid`；失败交给全局异常处理器。
+  exception:
+    - 统一走 `GlobalExceptionHandler`；禁止在业务中吞异常。
+  logging:
+    - 使用 `lombok @Slf4j`；日志分级：INFO 业务主线、WARN 可恢复异常、ERROR 不可恢复错误。
+  api:
+    - REST 风格；分页参数：`page`/`size`/`sortBy`/`sortDir`；统一 JSON 响应。
+
+code-style:
+  - 使用早返回减少嵌套；避免不必要的 try/catch；仅在明确可能抛出时捕获并转义业务语义。
+  - 注释仅保留“非显而易见”的关键信息（不写赘述性注释）。
+  - 保持方法短小、单一职责；拆分复杂逻辑。
+
+testing:
+  - 单元测试命名：`*Tests`；`@SpringBootTest` 用于集成测试。
+  - Service 层优先编写覆盖关键业务分支；Repository 层按查询语义编写简单校验测试。
+
+security:
+  - 当前 `SecurityConfig` 放开所有接口；若引入鉴权，优先使用 Spring Security + JWT。
+  - 禁止在仓库提交真实密钥/密码；通过环境变量或配置中心注入。
+
+database:
+  - dev 使用 H2（内存库），prod 使用 MySQL；DDL 策略：dev `update/create-drop`，prod `validate`。
+  - 禁止在 Service 层写原生 SQL；若需复杂查询优先 JPQL/Specification。
+
+performance:
+  - 查询分页必须走 `Pageable`；避免一次性全量返回。
+  - 需要关联查询时，优先在 Repository 侧明确选取字段或分页限制。
+
+observability:
+  - 在关键业务入口/异常路径记录日志；敏感数据（密码、密钥）禁止入日志。
+
+project-structure:
+  - 统一文件放置：
+    - `com.bj.wms.controller`：HTTP 接口（Request/Response）
+    - `com.bj.wms.service`：业务逻辑（含事务）
+    - `com.bj.wms.repository`：JPA 接口层
+    - `com.bj.wms.entity`：实体/校验
+    - `com.bj.wms.config`：安全、JPA、Web 等配置
+    - `com.bj.wms.exception`：全局异常处理
+    - `com.bj.wms.util`：通用工具类
+
+commit-rules:
+  - 使用动宾结构与简洁信息（中文或英文均可）：
+    - feat: 新增仓库搜索 API
+    - fix: 修复用户分页排序方向错误
+    - refactor: 抽取库存校验逻辑到单独方法
+    - docs: 新增前端快速上手文档
+    - chore: 升级依赖到 Spring Boot 3.4.1
+
+pr-rules:
+  - PR 标题清晰描述变更；说明变更动机、主要修改点、影响面、回滚策略。
+  - 保持 PR 小而专注；避免一次性跨多模块大改。
+
+ai-assistant:
+  - 输出默认使用中文；只在需要时使用代码块。
+  - 引用现有代码时使用明确文件路径；新代码用标准 Markdown 代码块。
+  - 如需新增模块，遵循本规则的分层、命名与日志约定。
+
+onboarding-for-frontend:
+  - 参考 `docs/backend-quickstart-for-frontend.md`；新增实体按四层模板复制并改造。
+  - 首选通过 Postman/Apifox 验证接口；出现错误先看全局异常响应与日志。
+
+

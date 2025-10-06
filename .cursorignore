@@ -1,0 +1,27 @@
+# Build outputs
+target/
+
+# IDE/Editor
+.idea/
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Env/Secrets (do not commit real secrets)
+.env
+.env.*
+
+# Node (in case of mixed repos)
+node_modules/
+**/node_modules/
+
+

@@ -1,0 +1,73 @@
+# Spring Boot 应用配置文件
+# 使用YAML格式，比properties文件更易读和结构化
+
+# 服务器配置
+server:
+  port: 8080  # 应用端口
+  servlet:
+    context-path: /api  # API路径前缀
+
+# Spring配置
+spring:
+  # 应用基本信息
+  application:
+    name: wms-backend
+  
+  # 数据源配置
+  datasource:
+    # 开发环境使用H2内存数据库（便于快速开发）
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+    # 生产环境MySQL配置（注释掉，需要时启用）
+    # url: jdbc:mysql://localhost:3306/wms_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    # driver-class-name: com.mysql.cj.jdbc.Driver
+    # username: root
+    # password: your_password
+  
+  # JPA/Hibernate配置
+  jpa:
+    hibernate:
+      ddl-auto: update  # 自动创建/更新表结构
+    show-sql: true      # 显示SQL语句
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect  # 数据库方言
+        format_sql: true  # 格式化SQL输出
+    open-in-view: false  # 避免懒加载问题
+  
+  # H2数据库控制台配置（仅开发环境）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # 安全配置
+  security:
+    user:
+      name: admin
+      password: admin123
+      roles: ADMIN
+
+# 日志配置
+logging:
+  level:
+    com.bj.wms: DEBUG  # 项目包日志级别
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# 自定义配置
+wms:
+  jwt:
+    secret: mySecretKey123456789012345678901234567890  # JWT密钥（生产环境应使用环境变量）
+    expiration: 86400000  # Token过期时间（24小时，单位：毫秒）
+  
+  # 分页配置
+  page:
+    default-size: 10
+    max-size: 100
