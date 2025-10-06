@@ -156,6 +156,25 @@ CREATE TABLE IF NOT EXISTS `inventory_transaction` (
   FOREIGN KEY (`location_id`) REFERENCES `storage_location`(`id`)
 );
 
+-- 5. 用户与权限表
+
+-- 用户表（与实体 com.bj.wms.entity.User 对应）
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `created_by` VARCHAR(100),
+  `created_time` TIMESTAMP,
+  `updated_by` VARCHAR(100),
+  `updated_time` TIMESTAMP,
+  `deleted` TINYINT DEFAULT 0,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `real_name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100),
+  `phone` VARCHAR(20),
+  `status` TINYINT NOT NULL,
+  `role` VARCHAR(20) NOT NULL
+);
+
 -- 4. 出库核心表
 
 -- 出库单表（销售订单）

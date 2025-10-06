@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.bj.wms.util.ResponseUtil;
 
 import java.util.Map;
 
@@ -64,14 +65,39 @@ public class UserController {
     }
 
     /**
+     * 获取当前登录用户
+     * GET /api/v1/users/me
+     */
+    @GetMapping("/me")
+    public ResponseEntity<java.util.Map<String, Object>> getCurrentUser(@RequestAttribute("currentUserId") Long currentUserId) {
+        return userService.getUserById(currentUserId)
+                .map(user -> ResponseUtil.success(toUserInfo(user)))
+                .orElse(ResponseUtil.notFound("user not found"));
+    }
+
+    private java.util.Map<String, Object> toUserInfo(User u) {
+        // 将后端枚举角色映射为前端权限路由所需的 roles 数组
+        String role = u.getRole() != null ? u.getRole().name().toLowerCase() : "viewer";
+        return java.util.Map.of(
+                "id", u.getId(),
+                "username", u.getUsername(),
+                "realName", u.getRealName(),
+                "email", u.getEmail(),
+                "phone", u.getPhone(),
+                "status", u.getStatus(),
+                "roles", java.util.List.of(role)
+        );
+    }
+
+    /**
      * 根据ID获取用户
      * GET /api/users/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<java.util.Map<String, Object>> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(user))
-                .orElse(ResponseEntity.notFound().build());
+                .map(ResponseUtil::success)
+                .orElse(ResponseUtil.notFound("user not found"));
     }
 
     /**

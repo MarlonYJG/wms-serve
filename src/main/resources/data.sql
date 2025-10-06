@@ -226,3 +226,5 @@ UPDATE storage_location SET status = 2, current_volume = 30.00 WHERE id = 21; --
 UPDATE storage_location SET status = 2, current_volume = 20.00 WHERE id = 22; -- 移动电源库存
 UPDATE storage_location SET status = 2, current_volume = 15.00 WHERE id = 26; -- 广州iPhone库存
 UPDATE storage_location SET status = 2, current_volume = 10.00 WHERE id = 27; -- 广州手环库存
+
+-- 15. 管理员账号由启动器 DataInitializer 保证存在（避免哈希漂移导致不一致）

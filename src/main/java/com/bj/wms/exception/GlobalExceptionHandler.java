@@ -1,6 +1,7 @@
 package com.bj.wms.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import com.bj.wms.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -8,8 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,25 +26,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
-        
-        Map<String, Object> response = new HashMap<>();
-        Map<String, String> errors = new HashMap<>();
-        
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "参数验证失败");
-        response.put("message", "请求参数不符合要求");
-        response.put("errors", errors);
-        
+        Map<String, String> errors = ex.getBindingResult().getAllErrors().stream()
+                .collect(java.util.stream.Collectors.toMap(e -> ((FieldError) e).getField(),
+                        org.springframework.validation.ObjectError::getDefaultMessage, (a, b) -> a));
         log.warn("参数验证失败: {}", errors);
-        
-        return ResponseEntity.badRequest().body(response);
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, "参数验证失败");
     }
 
     /**
@@ -53,16 +38,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "业务处理失败");
-        response.put("message", ex.getMessage());
-        
         log.error("业务异常: {}", ex.getMessage(), ex);
-        
-        return ResponseEntity.badRequest().body(response);
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     /**
@@ -71,17 +48,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
             IllegalArgumentException ex) {
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "参数错误");
-        response.put("message", ex.getMessage());
-        
         log.warn("参数错误: {}", ex.getMessage());
-        
-        return ResponseEntity.badRequest().body(response);
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     /**
@@ -90,17 +58,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Map<String, Object>> handleNullPointerException(
             NullPointerException ex) {
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "系统内部错误");
-        response.put("message", "系统处理过程中发生错误，请联系管理员");
-        
         log.error("空指针异常", ex);
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseUtil.serverError("系统内部错误");
     }
 
     /**
@@ -108,16 +67,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "系统内部错误");
-        response.put("message", "系统处理过程中发生未知错误，请联系管理员");
-        
         log.error("未处理的异常", ex);
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseUtil.serverError("系统内部错误");
     }
 }
 

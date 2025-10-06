@@ -3,93 +3,58 @@ package com.bj.wms.util;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 响应工具类
- * 
- * 提供统一的API响应格式
+ *
+ * 统一返回结构：{ code, data, msg }
  */
 public class ResponseUtil {
 
-    /**
-     * 成功响应
-     */
     public static <T> ResponseEntity<Map<String, Object>> success(T data) {
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
+        response.put("code", 200);
         response.put("data", data);
-        response.put("timestamp", LocalDateTime.now());
+        response.put("msg", "OK");
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 成功响应（无数据）
-     */
-    public static ResponseEntity<Map<String, Object>> success(String message) {
+    public static ResponseEntity<Map<String, Object>> successMsg(String msg) {
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now());
+        response.put("code", 200);
+        response.put("data", null);
+        response.put("msg", msg);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 创建成功响应
-     */
     public static <T> ResponseEntity<Map<String, Object>> created(T data) {
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
+        response.put("code", 200);
         response.put("data", data);
-        response.put("message", "创建成功");
-        response.put("timestamp", LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        response.put("msg", "创建成功");
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * 错误响应
-     */
-    public static ResponseEntity<Map<String, Object>> error(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now());
-        return ResponseEntity.badRequest().body(response);
+    public static ResponseEntity<Map<String, Object>> error(String msg) {
+        return error(HttpStatus.BAD_REQUEST, msg);
     }
 
-    /**
-     * 错误响应（指定状态码）
-     */
-    public static ResponseEntity<Map<String, Object>> error(HttpStatus status, String message) {
+    public static ResponseEntity<Map<String, Object>> error(HttpStatus status, String msg) {
         Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now());
+        response.put("code", status.value());
+        response.put("data", null);
+        response.put("msg", msg);
         return ResponseEntity.status(status).body(response);
     }
 
-    /**
-     * 未找到响应
-     */
-    public static ResponseEntity<Map<String, Object>> notFound(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public static ResponseEntity<Map<String, Object>> notFound(String msg) {
+        return error(HttpStatus.NOT_FOUND, msg);
     }
 
-    /**
-     * 服务器错误响应
-     */
-    public static ResponseEntity<Map<String, Object>> serverError(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    public static ResponseEntity<Map<String, Object>> serverError(String msg) {
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, msg);
     }
 }
 

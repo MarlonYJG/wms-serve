@@ -8,6 +8,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.bj.wms.service.DevTokenService;
 
 import java.util.Arrays;
 
@@ -18,6 +24,9 @@ import java.util.Arrays;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private DevTokenService devTokenService;
 
     /**
      * 跨域配置
@@ -31,6 +40,35 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new HandlerInterceptor() {
+            @Override
+            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+                String path = request.getRequestURI();
+                // 放行登录与验证码与开放端点
+                if (path.startsWith("/api/v1/auth")) return true;
+                // 简单基于 Header 的 Token 解析（Authorization: Bearer <token>）
+                String auth = request.getHeader("Authorization");
+                if (auth != null && auth.startsWith("Bearer ")) {
+                    String token = auth.substring(7);
+                    var userIdOpt = devTokenService.resolveUserId(token);
+                    if (userIdOpt.isPresent()) {
+                        // 将当前用户ID放入请求，便于 Controller 使用
+                        request.setAttribute("currentUserId", userIdOpt.get());
+                        return true;
+                    }
+                }
+                response.setStatus(401);
+                response.setContentType("application/json;charset=UTF-8");
+                try {
+                    response.getWriter().write("{\"code\":401,\"data\":null,\"msg\":\"unauthorized\"}");
+                } catch (Exception ignored) {}
+                return false;
+            }
+        });
     }
 
     /**
