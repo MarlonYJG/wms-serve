@@ -25,7 +25,7 @@ spring:
   sql:
     init:
       mode: always
-      # 开发环境不执行 schema.sql，交给 JPA ddl-auto 管理
+      schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
       continue-on-error: false
 
