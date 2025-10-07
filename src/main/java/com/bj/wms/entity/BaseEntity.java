@@ -1,6 +1,8 @@
 package com.bj.wms.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -51,7 +53,8 @@ public abstract class BaseEntity {
      * 逻辑删除标记
      * 0: 未删除, 1: 已删除
      */
-    @Column(name = "deleted", nullable = false)
+    @Column(name = "deleted", nullable = false, columnDefinition = "TINYINT")
+    @JdbcTypeCode(SqlTypes.TINYINT)
     private Integer deleted = 0;
 }
 

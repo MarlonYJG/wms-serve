@@ -12,8 +12,8 @@ import lombok.EqualsAndHashCode;
  * 仓库管理系统中的仓库信息
  */
 @Data
-@Entity
-@Table(name = "warehouses")
+// @Entity
+// @Table(name = "warehouses")
 @EqualsAndHashCode(callSuper = true)
 public class Warehouse extends BaseEntity {
 

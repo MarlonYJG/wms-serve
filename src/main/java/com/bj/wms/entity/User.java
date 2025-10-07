@@ -44,7 +44,7 @@ public class User extends BaseEntity {
      * 用户状态
      * 0: 禁用, 1: 启用
      */
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "TINYINT")
     private Integer status = 1;
 
     /**

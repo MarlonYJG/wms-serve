@@ -16,8 +16,8 @@ import java.math.BigDecimal;
  * 仓库管理系统中的商品信息
  */
 @Data
-@Entity
-@Table(name = "products")
+// @Entity
+// @Table(name = "products")
 @EqualsAndHashCode(callSuper = true)
 public class Product extends BaseEntity {
 
