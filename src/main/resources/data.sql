@@ -15,44 +15,45 @@ TRUNCATE TABLE inventory;
 TRUNCATE TABLE putaway_task;
 TRUNCATE TABLE inbound_order_item;
 TRUNCATE TABLE inbound_order;
-TRUNCATE TABLE product_sku;
 TRUNCATE TABLE storage_location;
 TRUNCATE TABLE storage_zone;
-TRUNCATE TABLE warehouse;
+TRUNCATE TABLE product_sku;
+TRUNCATE TABLE users;
 TRUNCATE TABLE customer;
 TRUNCATE TABLE supplier;
+TRUNCATE TABLE warehouse;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1) 基础主数据
-INSERT INTO supplier (name, code, contact_person, phone, address, is_enabled, created_time) VALUES
-('华北电子', 'SUP001', '张三', '010-10000001', '北京海淀', 1, CONCAT(@yday,' 09:00:00')),
-('华东制造', 'SUP002', '李四', '021-10000002', '上海浦东', 1, CONCAT(@yday,' 09:00:00'));
+INSERT INTO supplier (supplier_name, supplier_code, contact_person, phone, email, address, rating, is_enabled, created_time) VALUES
+('华北电子', 'SUP001', '张三', '010-10000001', 'sales@north.cn', '北京海淀', 2, 1, CONCAT(@yday,' 09:00:00')),
+('华东制造', 'SUP002', '李四', '021-10000002', 'sales@east.cn',  '上海浦东', 3, 1, CONCAT(@yday,' 09:00:00'));
 
-INSERT INTO customer (name, code, contact_person, phone, address, is_enabled, created_time) VALUES
-('京东商城', 'CUST001', '王一', '400-000-0001', '北京朝阳', 1, CONCAT(@yday,' 09:00:00')),
-('天猫超市', 'CUST002', '赵六', '400-000-0002', '杭州余杭', 1, CONCAT(@yday,' 09:00:00'));
+INSERT INTO customer (customer_name, customer_code, customer_type, contact_person, phone, email, address, credit_rating, credit_limit, is_enabled, created_time) VALUES
+('京东商城', 'CUST001', 2, '王一', '400-000-0001', 'jd@corp.cn', '北京朝阳', 3, 500000.00, 1, CONCAT(@yday,' 09:00:00')),
+('天猫超市', 'CUST002', 2, '赵六', '400-000-0002', 'tmall@corp.cn','杭州余杭', 3, 600000.00, 1, CONCAT(@yday,' 09:00:00'));
 
 INSERT INTO warehouse (name, code, address, is_enabled, created_time) VALUES
 ('北京主仓', 'WH001', '北京通州物流园', 1, CONCAT(@yday,' 09:05:00'));
 
--- zone: 1收货区/2存储/6拣货/3发货
-INSERT INTO storage_zone (warehouse_id, name, type, created_time) VALUES
-(1, '收货区', 2, CONCAT(@yday,' 09:10:00')),
-(1, '存储区A', 1, CONCAT(@yday,' 09:10:00')),
-(1, '拣货区', 6, CONCAT(@yday,' 09:10:00')),
-(1, '发货区', 3, CONCAT(@yday,' 09:10:00'));
+-- zone: 2收货/1存储/6拣货/3发货
+INSERT INTO storage_zone (warehouse_id, zone_code, zone_name, zone_type, capacity, used_capacity, is_enabled, created_time) VALUES
+(1, 'BJ-RCV',  '收货区', 2, 1000.00, 0.00, 1, CONCAT(@yday,' 09:10:00')),
+(1, 'BJ-A',    '存储区A', 1, 5000.00, 0.00, 1, CONCAT(@yday,' 09:10:00')),
+(1, 'BJ-PICK', '拣货区', 6, 2000.00, 0.00, 1, CONCAT(@yday,' 09:10:00')),
+(1, 'BJ-SHIP', '发货区', 3, 1000.00, 0.00, 1, CONCAT(@yday,' 09:10:00'));
 
-INSERT INTO storage_location (zone_id, location_code, capacity, current_volume, status, created_time) VALUES
-(1, 'BJ-RCV-01', 100.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
-(2, 'BJ-A-01-01', 50.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
-(2, 'BJ-A-01-02', 50.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
-(3, 'BJ-PICK-01', 30.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
-(4, 'BJ-SHIP-01', 20.00, 0.00, 1, CONCAT(@yday,' 09:15:00'));
+INSERT INTO storage_location (zone_id, location_code, location_name, location_type, capacity, current_volume, status, created_time) VALUES
+(1, 'BJ-RCV-01',  '收货暂存01', 2, 100.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
+(2, 'BJ-A-01-01', 'A区01排01层01位', 1, 50.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
+(2, 'BJ-A-01-02', 'A区01排01层02位', 1, 50.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
+(3, 'BJ-PICK-01','拣货位01', 1, 30.00, 0.00, 1, CONCAT(@yday,' 09:15:00')),
+(4, 'BJ-SHIP-01','发货暂存01', 2, 20.00, 0.00, 1, CONCAT(@yday,' 09:15:00'));
 
-INSERT INTO product_sku (sku_code, name, specification, supplier_id, is_batch_managed, is_expiry_managed, shelf_life_days, created_time) VALUES
-('SKU1001', '智能手环', '黑色 标准款', 1, 0, 0, NULL, CONCAT(@yday,' 09:20:00')),
-('SKU1002', '蓝牙耳机', '降噪版',     1, 0, 0, NULL, CONCAT(@yday,' 09:20:00')),
-('SKU1003', '有机大米', '5kg',        2, 1, 1, 365, CONCAT(@yday,' 09:20:00'));
+INSERT INTO product_sku (sku_code, sku_name, specification, brand, category_id, supplier_id, barcode, weight, volume, is_batch_managed, is_expiry_managed, shelf_life_days, safety_stock, is_enabled, created_time) VALUES
+('SKU1001', '智能手环', '黑色 标准款', '智品', NULL, 1, '690000100001', 0.0500, 0.0008, 0, 0, NULL, 100, 1, CONCAT(@yday,' 09:20:00')),
+('SKU1002', '蓝牙耳机', '降噪版',     '声浪', NULL, 1, '690000100002', 0.0300, 0.0006, 0, 0, NULL, 100, 1, CONCAT(@yday,' 09:20:00')),
+('SKU1003', '有机大米', '5kg',        '稻香', NULL, 2, '690000100003', 5.0000, 0.0080, 1, 1, 365, 50, 1, CONCAT(@yday,' 09:20:00'));
 
 -- 2) 入库域：构造 4 种状态（1待收货/2部分收货/3已完成/4已取消）
 -- 已完成（3）：昨日完成并上架
