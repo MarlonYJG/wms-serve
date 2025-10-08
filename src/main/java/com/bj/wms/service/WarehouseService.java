@@ -21,7 +21,8 @@ public class WarehouseService {
     private final WarehouseRepository warehouseRepository;
 
     public Page<Warehouse> page(Integer page, Integer size, String sortBy, String sortDir,
-                                String keyword, String name, String code, Boolean isEnabled) {
+                                String keyword, String name, String code, Boolean isEnabled,
+                                Long startTime, Long endTime) {
         Pageable pageable = PageUtil.createPageable(
                 PageUtil.validatePage(page == null ? PageUtil.DEFAULT_PAGE : page),
                 PageUtil.validateSize(size == null ? PageUtil.DEFAULT_SIZE : size),
@@ -46,6 +47,19 @@ public class WarehouseService {
             }
             if (isEnabled != null) {
                 predicate.getExpressions().add(cb.equal(root.get("isEnabled"), isEnabled));
+            }
+            // 时间范围：按创建时间过滤（毫秒时间戳）
+            if (startTime != null && startTime > 0) {
+                var start = java.time.Instant.ofEpochMilli(startTime)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime();
+                predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get("createdTime"), start));
+            }
+            if (endTime != null && endTime > 0) {
+                var end = java.time.Instant.ofEpochMilli(endTime)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime();
+                predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get("createdTime"), end));
             }
             predicate.getExpressions().add(cb.equal(root.get("deleted"), 0));
             return predicate;

@@ -35,7 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/api/v1/**")
-                .allowedOriginPatterns("*")  // 允许所有域名
+                .allowedOriginPatterns("*") // 允许所有域名
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
@@ -49,7 +49,8 @@ public class WebConfig implements WebMvcConfigurer {
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
                 String path = request.getRequestURI();
                 // 放行登录与验证码与开放端点
-                if (path.startsWith("/api/v1/auth")) return true;
+                if (path.startsWith("/api/v1/auth"))
+                    return true;
                 // 简单基于 Header 的 Token 解析（Authorization: Bearer <token>）
                 String auth = request.getHeader("Authorization");
                 if (auth != null && auth.startsWith("Bearer ")) {
@@ -65,7 +66,8 @@ public class WebConfig implements WebMvcConfigurer {
                 response.setContentType("application/json;charset=UTF-8");
                 try {
                     response.getWriter().write("{\"code\":401,\"data\":null,\"msg\":\"unauthorized\"}");
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
                 return false;
             }
         });
@@ -78,27 +80,25 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
+
         // 允许的域名
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        
+
         // 允许的HTTP方法
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
+
         // 允许的请求头
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        
+
         // 是否允许携带凭证
         configuration.setAllowCredentials(true);
-        
+
         // 预检请求的缓存时间
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/v1/**", configuration);
-        
+
         return source;
     }
 }
-
-
