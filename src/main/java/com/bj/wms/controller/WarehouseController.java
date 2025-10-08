@@ -6,7 +6,7 @@ import com.bj.wms.dto.WarehouseQueryDTO;
 import com.bj.wms.dto.WarehouseUpdateDTO;
 import com.bj.wms.entity.Warehouse;
 import com.bj.wms.service.WarehouseService;
-import com.bj.wms.util.DTOConverter;
+import com.bj.wms.mapper.WarehouseMapper;
 import com.bj.wms.util.ResponseUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class WarehouseController {
         
         // 转换为DTO
         List<WarehouseDTO> content = result.getContent().stream()
-            .map(DTOConverter::toWarehouseDTO)
+            .map(WarehouseMapper::toDTO)
             .collect(Collectors.toList());
         
         return ResponseUtil.pageSuccess(
@@ -64,7 +64,7 @@ public class WarehouseController {
     public ResponseEntity<Map<String, Object>> detail(@PathVariable Long id) {
         Warehouse warehouse = warehouseService.getById(id)
                 .orElseThrow(() -> new IllegalArgumentException("仓库不存在"));
-        WarehouseDTO dto = DTOConverter.toWarehouseDTO(warehouse);
+        WarehouseDTO dto = WarehouseMapper.toDTO(warehouse);
         return ResponseUtil.success(dto);
     }
 
@@ -84,7 +84,7 @@ public class WarehouseController {
         warehouse.setTotalCapacity(createDTO.getTotalCapacity());
         
         Warehouse created = warehouseService.create(warehouse);
-        WarehouseDTO dto = DTOConverter.toWarehouseDTO(created);
+        WarehouseDTO dto = WarehouseMapper.toDTO(created);
         return ResponseUtil.created(dto);
     }
 
@@ -117,7 +117,7 @@ public class WarehouseController {
         }
         
         Warehouse updated = warehouseService.update(id, existing);
-        WarehouseDTO dto = DTOConverter.toWarehouseDTO(updated);
+        WarehouseDTO dto = WarehouseMapper.toDTO(updated);
         return ResponseUtil.success(dto);
     }
 
@@ -140,7 +140,7 @@ public class WarehouseController {
             return ResponseUtil.error("isEnabled 不能为空");
         }
         Warehouse updated = warehouseService.updateStatus(id, isEnabled);
-        WarehouseDTO dto = DTOConverter.toWarehouseDTO(updated);
+        WarehouseDTO dto = WarehouseMapper.toDTO(updated);
         return ResponseUtil.success(dto);
     }
 

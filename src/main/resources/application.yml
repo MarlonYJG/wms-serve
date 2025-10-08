@@ -46,6 +46,10 @@ spring:
   
   # 安全配置：删除默认用户，使用自定义 SecurityConfig 放行策略
 
+  # 国际化消息编码（用于校验消息、异常消息等）
+  messages:
+    encoding: UTF-8
+
 # 日志配置
 logging:
   level:
@@ -55,6 +59,10 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  # 设置日志输出编码，避免控制台中文乱码
+  charset:
+    console: UTF-8
+    file: UTF-8
 
 # 自定义配置
 wms:

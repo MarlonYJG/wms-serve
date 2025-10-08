@@ -71,7 +71,12 @@ CREATE TABLE IF NOT EXISTS `customer` (
 
 -- 库区表（按文档增加编码/容量/状态）
 CREATE TABLE IF NOT EXISTS `storage_zone` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `created_by` VARCHAR(50),
+  `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50),
+  `updated_time` TIMESTAMP NULL,
+  `deleted` TINYINT DEFAULT 0,
   `warehouse_id` BIGINT NOT NULL COMMENT '所属仓库ID',
   `zone_code` VARCHAR(50) NOT NULL COMMENT '库区编码',
   `zone_name` VARCHAR(100) NOT NULL COMMENT '库区名称',
@@ -79,8 +84,6 @@ CREATE TABLE IF NOT EXISTS `storage_zone` (
   `capacity` DECIMAL(12,2) NULL COMMENT '库区容量',
   `used_capacity` DECIMAL(12,2) NULL COMMENT '已用容量',
   `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
-  `created_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `updated_time` DATETIME NULL,
   UNIQUE KEY `uk_zone_code` (`zone_code`),
   FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse`(`id`)
 );
@@ -88,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `storage_zone` (
 -- 库位表（扩展名称/类型/状态）
 CREATE TABLE IF NOT EXISTS `storage_location` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `zone_id` INT NOT NULL COMMENT '所属库区ID',
+  `zone_id` BIGINT NOT NULL COMMENT '所属库区ID',
   `location_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '库位编码（如A-01-01-01）',
   `location_name` VARCHAR(100) COMMENT '库位名称',
   `location_type` TINYINT DEFAULT 1 COMMENT '库位类型（1货架 2地面 3冷藏 4危险）',
