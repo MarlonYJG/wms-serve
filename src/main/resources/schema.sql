@@ -88,17 +88,20 @@ CREATE TABLE IF NOT EXISTS `storage_zone` (
   FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse`(`id`)
 );
 
--- 库位表（扩展名称/类型/状态）
 CREATE TABLE IF NOT EXISTS `storage_location` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `created_by` VARCHAR(50),
+  `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50),
+  `updated_time` TIMESTAMP NULL,
+  `deleted` TINYINT DEFAULT 0,
   `zone_id` BIGINT NOT NULL COMMENT '所属库区ID',
   `location_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '库位编码（如A-01-01-01）',
   `location_name` VARCHAR(100) COMMENT '库位名称',
   `location_type` TINYINT DEFAULT 1 COMMENT '库位类型（1货架 2地面 3冷藏 4危险）',
-  `capacity` DECIMAL(10,2) COMMENT '容量',
-  `current_volume` DECIMAL(10,2) DEFAULT 0 COMMENT '当前占用容量',
+  `capacity` DECIMAL(12,2) COMMENT '容量',
+  `current_volume` DECIMAL(12,2) DEFAULT 0 COMMENT '当前占用容量',
   `status` TINYINT DEFAULT 1 COMMENT '状态（1空闲 2占用 3禁用）',
-  `created_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_location_code` (`location_code`),
   FOREIGN KEY (`zone_id`) REFERENCES `storage_zone`(`id`)
 );
