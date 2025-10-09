@@ -61,12 +61,8 @@ public class StorageZoneController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Map<String, Object>> changeStatus(@PathVariable Long id, @RequestBody Map<String, Boolean> body) {
-        StorageZone exist = storageZoneService.getById(id).orElseThrow(() -> new IllegalArgumentException("库区不存在"));
         Boolean enabled = body.get("isEnabled");
-        if (enabled != null) {
-            exist.setIsEnabled(enabled);
-        }
-        StorageZone saved = storageZoneService.update(exist);
+        StorageZone saved = storageZoneService.updateStatus(id, enabled != null ? enabled : Boolean.TRUE);
         return ResponseUtil.success(StorageZoneMapper.toDTO(saved));
     }
 

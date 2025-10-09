@@ -24,12 +24,14 @@ public class StorageZoneService {
         Pageable pageable = PageUtil.createPageable(
                 PageUtil.validatePage(query.getPage()),
                 PageUtil.validateSize(query.getSize()),
-                query.getSortBy(),
-                "asc".equalsIgnoreCase(query.getSortDir()) ? org.springframework.data.domain.Sort.Direction.ASC : org.springframework.data.domain.Sort.Direction.DESC
+                PageUtil.validateSortBy(query.getSortBy()),
+                PageUtil.validateSortDirection(query.getSortDir())
         );
 
         Specification<StorageZone> spec = (root, cq, cb) -> {
             var predicate = cb.conjunction();
+            // 仅查询未删除
+            predicate.getExpressions().add(cb.equal(root.get("deleted"), 0));
             if (query.getWarehouseId() != null) {
                 predicate.getExpressions().add(cb.equal(root.get("warehouseId"), query.getWarehouseId()));
             }
@@ -58,17 +60,43 @@ public class StorageZoneService {
 
     @Transactional
     public StorageZone create(StorageZone zone) {
+        if (storageZoneRepository.existsByZoneCode(zone.getZoneCode())) {
+            throw new IllegalArgumentException("库区编码已存在");
+        }
         return storageZoneRepository.save(zone);
     }
 
     @Transactional
     public StorageZone update(StorageZone zone) {
-        return storageZoneRepository.save(zone);
+        StorageZone exist = storageZoneRepository.findById(zone.getId())
+                .orElseThrow(() -> new IllegalArgumentException("库区不存在"));
+        if (!exist.getZoneCode().equals(zone.getZoneCode()) && storageZoneRepository.existsByZoneCode(zone.getZoneCode())) {
+            throw new IllegalArgumentException("库区编码已存在");
+        }
+        exist.setWarehouseId(zone.getWarehouseId());
+        exist.setZoneCode(zone.getZoneCode());
+        exist.setZoneName(zone.getZoneName());
+        exist.setZoneType(zone.getZoneType());
+        exist.setCapacity(zone.getCapacity());
+        exist.setUsedCapacity(zone.getUsedCapacity());
+        exist.setIsEnabled(zone.getIsEnabled() == null ? exist.getIsEnabled() : zone.getIsEnabled());
+        return storageZoneRepository.save(exist);
     }
 
     @Transactional
     public void deleteById(Long id) {
-        storageZoneRepository.deleteById(id);
+        StorageZone exist = storageZoneRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("库区不存在"));
+        exist.setDeleted(1);
+        storageZoneRepository.save(exist);
+    }
+
+    @Transactional
+    public StorageZone updateStatus(Long id, Boolean isEnabled) {
+        StorageZone exist = storageZoneRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("库区不存在"));
+        exist.setIsEnabled(Boolean.TRUE.equals(isEnabled));
+        return storageZoneRepository.save(exist);
     }
 }
 
