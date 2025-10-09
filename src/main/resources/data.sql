@@ -25,11 +25,11 @@ TRUNCATE TABLE warehouse;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1) 基础主数据
-INSERT INTO supplier (supplier_name, supplier_code, contact_person, phone, email, address, rating, is_enabled, created_time) VALUES
+INSERT INTO supplier (supplier_name, supplier_code, contact_person, contact_phone, email, address, rating, is_enabled, created_time) VALUES
 ('华北电子', 'SUP001', '张三', '010-10000001', 'sales@north.cn', '北京海淀', 2, 1, CONCAT(@yday,' 09:00:00')),
 ('华东制造', 'SUP002', '李四', '021-10000002', 'sales@east.cn',  '上海浦东', 3, 1, CONCAT(@yday,' 09:00:00'));
 
-INSERT INTO customer (customer_name, customer_code, customer_type, contact_person, phone, email, address, credit_rating, credit_limit, is_enabled, created_time) VALUES
+INSERT INTO customer (customer_name, customer_code, customer_type, contact_person, contact_phone, email, address, credit_rating, credit_limit, is_enabled, created_time) VALUES
 ('京东商城', 'CUST001', 2, '王一', '400-000-0001', 'jd@corp.cn', '北京朝阳', 3, 500000.00, 1, CONCAT(@yday,' 09:00:00')),
 ('天猫超市', 'CUST002', 2, '赵六', '400-000-0002', 'tmall@corp.cn','杭州余杭', 3, 600000.00, 1, CONCAT(@yday,' 09:00:00'));
 
