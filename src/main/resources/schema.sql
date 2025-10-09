@@ -108,13 +108,18 @@ CREATE TABLE IF NOT EXISTS `storage_location` (
 
 -- 商品SKU表（按文档字段）
 CREATE TABLE IF NOT EXISTS `product_sku` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `created_by` VARCHAR(50),
+  `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50),
+  `updated_time` TIMESTAMP NULL,
+  `deleted` TINYINT DEFAULT 0,
   `sku_code` VARCHAR(100) NOT NULL UNIQUE COMMENT '商品SKU编码',
   `sku_name` VARCHAR(255) NOT NULL COMMENT '商品名称',
   `specification` VARCHAR(255) COMMENT '规格',
   `brand` VARCHAR(100) COMMENT '品牌',
-  `category_id` INT NULL COMMENT '分类ID',
-  `supplier_id` INT NULL COMMENT '默认供应商ID',
+  `category_id` BIGINT NULL COMMENT '分类ID',
+  `supplier_id` BIGINT NULL COMMENT '默认供应商ID',
   `barcode` VARCHAR(100) COMMENT '条码',
   `weight` DECIMAL(12,4) NULL COMMENT '重量',
   `volume` DECIMAL(12,6) NULL COMMENT '体积',
@@ -123,7 +128,6 @@ CREATE TABLE IF NOT EXISTS `product_sku` (
   `shelf_life_days` INT NULL COMMENT '保质期天数',
   `safety_stock` INT NULL COMMENT '安全库存',
   `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
-  `created_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`supplier_id`) REFERENCES `supplier`(`id`)
 );
 
