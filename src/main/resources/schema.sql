@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `supplier` (
   `contact_phone` VARCHAR(20) COMMENT '联系电话',
   `email` VARCHAR(100) COMMENT '邮箱',
   `address` VARCHAR(255) COMMENT '地址',
-  `rating` TINYINT DEFAULT 3 COMMENT '评级（1:A 2:B 3:C 4:D）',
+  `rating` INT DEFAULT 3 COMMENT '评级（1:A 2:B 3:C 4:D）',
   `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用'
 );
 
@@ -67,12 +67,12 @@ CREATE TABLE IF NOT EXISTS `customer` (
   `deleted` TINYINT DEFAULT 0,
   `customer_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '客户编码',
   `customer_name` VARCHAR(100) NOT NULL COMMENT '客户名称',
-  `customer_type` TINYINT DEFAULT 2 COMMENT '客户类型（1个人 2企业 3代理商 4经销商）',
+  `customer_type` INT DEFAULT 2 COMMENT '客户类型（1个人 2企业 3代理商 4经销商）',
   `contact_person` VARCHAR(50) COMMENT '联系人',
   `contact_phone` VARCHAR(20) COMMENT '联系电话',
   `email` VARCHAR(100) COMMENT '邮箱',
   `address` VARCHAR(255) COMMENT '地址',
-  `credit_rating` TINYINT DEFAULT 3 COMMENT '信用等级（1:AAA 2:AA 3:A 4:B 5:C）',
+  `credit_rating` INT DEFAULT 3 COMMENT '信用等级（1:AAA 2:AA 3:A 4:B 5:C）',
   `credit_limit` DECIMAL(12,2) NULL COMMENT '信用额度',
   `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用'
 );
@@ -106,10 +106,10 @@ CREATE TABLE IF NOT EXISTS `storage_location` (
   `zone_id` BIGINT NOT NULL COMMENT '所属库区ID',
   `location_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '库位编码（如A-01-01-01）',
   `location_name` VARCHAR(100) COMMENT '库位名称',
-  `location_type` TINYINT DEFAULT 1 COMMENT '库位类型（1货架 2地面 3冷藏 4危险）',
+  `location_type` INT DEFAULT 1 COMMENT '库位类型（1货架 2地面 3冷藏 4危险）',
   `capacity` DECIMAL(12,2) COMMENT '容量',
   `current_volume` DECIMAL(12,2) DEFAULT 0 COMMENT '当前占用容量',
-  `status` TINYINT DEFAULT 1 COMMENT '状态（1空闲 2占用 3禁用）',
+  `status` INT DEFAULT 1 COMMENT '状态（1空闲 2占用 3禁用）',
   UNIQUE KEY `uk_location_code` (`location_code`),
   FOREIGN KEY (`zone_id`) REFERENCES `storage_zone`(`id`)
 );
