@@ -41,32 +41,40 @@ CREATE TABLE IF NOT EXISTS `warehouse` (
 
 -- 供应商表（扩展邮箱、评级）
 CREATE TABLE IF NOT EXISTS `supplier` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `supplier_name` VARCHAR(100) NOT NULL COMMENT '供应商名称',
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `created_by` VARCHAR(50),
+  `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50),
+  `updated_time` TIMESTAMP NULL,
+  `deleted` TINYINT DEFAULT 0,
   `supplier_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '供应商编码',
+  `supplier_name` VARCHAR(100) NOT NULL COMMENT '供应商名称',
   `contact_person` VARCHAR(50) COMMENT '联系人',
-  `phone` VARCHAR(20) COMMENT '联系电话',
+  `contact_phone` VARCHAR(20) COMMENT '联系电话',
   `email` VARCHAR(100) COMMENT '邮箱',
   `address` VARCHAR(255) COMMENT '地址',
   `rating` TINYINT DEFAULT 3 COMMENT '评级（1:A 2:B 3:C 4:D）',
-  `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
-  `created_time` DATETIME DEFAULT CURRENT_TIMESTAMP
+  `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用'
 );
 
 -- 客户表（扩展类型、信用）
 CREATE TABLE IF NOT EXISTS `customer` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `customer_name` VARCHAR(100) NOT NULL COMMENT '客户名称',
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `created_by` VARCHAR(50),
+  `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50),
+  `updated_time` TIMESTAMP NULL,
+  `deleted` TINYINT DEFAULT 0,
   `customer_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '客户编码',
+  `customer_name` VARCHAR(100) NOT NULL COMMENT '客户名称',
   `customer_type` TINYINT DEFAULT 2 COMMENT '客户类型（1个人 2企业 3代理商 4经销商）',
   `contact_person` VARCHAR(50) COMMENT '联系人',
-  `phone` VARCHAR(20) COMMENT '联系电话',
+  `contact_phone` VARCHAR(20) COMMENT '联系电话',
   `email` VARCHAR(100) COMMENT '邮箱',
   `address` VARCHAR(255) COMMENT '地址',
   `credit_rating` TINYINT DEFAULT 3 COMMENT '信用等级（1:AAA 2:AA 3:A 4:B 5:C）',
   `credit_limit` DECIMAL(12,2) NULL COMMENT '信用额度',
-  `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
-  `created_time` DATETIME DEFAULT CURRENT_TIMESTAMP
+  `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用'
 );
 
 -- 库区表（按文档增加编码/容量/状态）
