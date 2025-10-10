@@ -22,40 +22,90 @@
 src/
 ├── main/
 │   ├── java/com/bj/wms/
-│   │   ├── WmsApplication.java          # 主启动类
-│   │   ├── config/                      # 配置类
-│   │   │   ├── AppConfig.java           # 应用配置
-│   │   │   ├── DatabaseConfig.java      # 数据库配置
-│   │   │   ├── SecurityConfig.java      # 安全配置
-│   │   │   └── WebConfig.java           # Web配置
-│   │   ├── controller/                  # 控制器层
-│   │   │   ├── HomeController.java      # 首页控制器
-│   │   │   ├── UserController.java      # 用户控制器
-│   │   │   ├── ProductController.java   # 商品控制器
-│   │   │   └── WarehouseController.java # 仓库控制器
-│   │   ├── entity/                      # 实体类
-│   │   │   ├── BaseEntity.java          # 基础实体
-│   │   │   ├── User.java                # 用户实体
-│   │   │   ├── Product.java             # 商品实体
-│   │   │   └── Warehouse.java           # 仓库实体
-│   │   ├── exception/                   # 异常处理
-│   │   │   └── GlobalExceptionHandler.java # 全局异常处理器
-│   │   ├── repository/                  # 数据访问层
-│   │   │   ├── UserRepository.java      # 用户Repository
-│   │   │   ├── ProductRepository.java   # 商品Repository
-│   │   │   └── WarehouseRepository.java # 仓库Repository
-│   │   ├── service/                     # 业务逻辑层
-│   │   │   ├── UserService.java         # 用户服务
-│   │   │   ├── ProductService.java      # 商品服务
-│   │   │   └── WarehouseService.java    # 仓库服务
-│   │   └── util/                        # 工具类
-│   │       ├── PageUtil.java            # 分页工具
-│   │       └── ResponseUtil.java        # 响应工具
+│   │   ├── WmsApplication.java              # 主启动类
+│   │   ├── config/                          # 配置类
+│   │   │   ├── AppConfig.java               # 应用配置
+│   │   │   ├── DatabaseConfig.java          # 数据库配置
+│   │   │   ├── DataInitializer.java         # 数据初始化
+│   │   │   ├── SecurityConfig.java          # 安全配置
+│   │   │   └── WebConfig.java               # Web配置
+│   │   ├── controller/                      # 控制器层
+│   │   │   ├── AuthController.java          # 认证/开发令牌
+│   │   │   ├── HomeController.java          # 首页与健康检查
+│   │   │   ├── ProductController.java       # 商品接口
+│   │   │   ├── StorageLocationController.java # 库位接口
+│   │   │   ├── StorageZoneController.java   # 库区接口
+│   │   │   ├── UserController.java          # 用户接口
+│   │   │   └── WarehouseController.java     # 仓库接口
+│   │   ├── dto/                              # 传输对象
+│   │   │   ├── CustomerDTO.java
+│   │   │   ├── ProductSkuDTO.java
+│   │   │   ├── StorageLocationDTO.java
+│   │   │   ├── StorageLocationQueryDTO.java
+│   │   │   ├── StorageZoneDTO.java
+│   │   │   ├── StorageZoneQueryDTO.java
+│   │   │   ├── SupplierDTO.java
+│   │   │   ├── WarehouseCreateDTO.java
+│   │   │   ├── WarehouseDTO.java
+│   │   │   ├── WarehouseQueryDTO.java
+│   │   │   └── WarehouseUpdateDTO.java
+│   │   ├── entity/                          # 实体与类型
+│   │   │   ├── BaseEntity.java              # 基础实体
+│   │   │   ├── converter/                   # JPA 转换器
+│   │   │   │   ├── CreditRatingConverter.java
+│   │   │   │   ├── CustomerTypeConverter.java
+│   │   │   │   ├── LocationStatusConverter.java
+│   │   │   │   ├── LocationTypeConverter.java
+│   │   │   │   ├── SupplierRatingConverter.java
+│   │   │   │   └── ZoneTypeConverter.java
+│   │   │   ├── CreditRating.java
+│   │   │   ├── Customer.java
+│   │   │   ├── CustomerType.java
+│   │   │   ├── LocationStatus.java
+│   │   │   ├── LocationType.java
+│   │   │   ├── Product.java
+│   │   │   ├── ProductSku.java
+│   │   │   ├── StorageLocation.java
+│   │   │   ├── StorageZone.java
+│   │   │   ├── Supplier.java
+│   │   │   ├── SupplierRating.java
+│   │   │   ├── User.java
+│   │   │   └── Warehouse.java
+│   │   ├── exception/                       # 全局异常
+│   │   │   └── GlobalExceptionHandler.java
+│   │   ├── mapper/                          # MapStruct 映射
+│   │   │   ├── CustomerMapper.java
+│   │   │   ├── ProductSkuMapper.java
+│   │   │   ├── StorageLocationMapper.java
+│   │   │   ├── StorageZoneMapper.java
+│   │   │   ├── SupplierMapper.java
+│   │   │   └── WarehouseMapper.java
+│   │   ├── repository/                      # 数据访问层
+│   │   │   ├── CustomerRepository.java
+│   │   │   ├── ProductRepository.java
+│   │   │   ├── ProductSkuRepository.java
+│   │   │   ├── StorageLocationRepository.java
+│   │   │   ├── StorageZoneRepository.java
+│   │   │   ├── SupplierRepository.java
+│   │   │   ├── UserRepository.java
+│   │   │   └── WarehouseRepository.java
+│   │   ├── service/                         # 业务逻辑层
+│   │   │   ├── DevTokenService.java
+│   │   │   ├── NumericCaptchaService.java
+│   │   │   ├── ProductService.java
+│   │   │   ├── StorageLocationService.java
+│   │   │   ├── StorageZoneService.java
+│   │   │   ├── UserService.java
+│   │   │   └── WarehouseService.java
+│   │   └── util/                            # 工具类
+│   │       ├── PageUtil.java                # 分页工具
+│   │       └── ResponseUtil.java            # 统一响应
 │   └── resources/
-│       ├── application.yml              # 主配置文件
-│       ├── application-dev.yml          # 开发环境配置
-│       ├── application-prod.yml         # 生产环境配置
-│       └── data.sql                     # 初始化数据
+│       ├── application.yml                  # 主配置文件
+│       ├── application-dev.yml              # 开发环境配置
+│       ├── application-prod.yml             # 生产环境配置
+│       ├── schema.sql                       # DDL 初始化
+│       └── data.sql                         # 测试数据
 └── test/
     └── java/com/bj/wms/
         └── WmsApplicationTests.java     # 测试类
@@ -85,7 +135,7 @@ src/
 
 ```bash
 git clone <your-repo-url>
-cd wms-backend
+cd wms-serve
 ```
 
 ### 2. 配置数据库
