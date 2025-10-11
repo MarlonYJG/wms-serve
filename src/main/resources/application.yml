@@ -13,19 +13,13 @@ spring:
   application:
     name: wms-backend
   
-  # 数据源配置
+  # 数据源配置 - 默认开发环境配置
   datasource:
     # 开发环境使用H2内存数据库（便于快速开发）
     url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=VALUE
     driver-class-name: org.h2.Driver
     username: sa
-    password: 
-    
-    # 生产环境MySQL配置（注释掉，需要时启用）
-    # url: jdbc:mysql://localhost:3306/wms_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    # driver-class-name: com.mysql.cj.jdbc.Driver
-    # username: root
-    # password: your_password
+    password:
   
   # JPA/Hibernate配置
   jpa:
