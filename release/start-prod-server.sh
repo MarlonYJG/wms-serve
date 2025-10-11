@@ -20,7 +20,7 @@ LOG_DIR="/root/workspace/serve/logs"
 mkdir -p "$LOG_DIR"
 
 # 设置JVM参数
-JVM_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps"
+JVM_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -Xlog:gc*:gc.log:time"
 
 # 设置环境变量
 export SPRING_PROFILES_ACTIVE=prod
@@ -33,7 +33,7 @@ echo ""
 
 # 启动应用
 echo "正在启动应用..."
-nohup java $JVM_OPTS -jar "$JAR_FILE" --spring.profiles.active=prod > "$LOG_DIR/app.log" 2>&1 &
+nohup java $JVM_OPTS -jar "$JAR_FILE" --spring.profiles.active=prod --server.address=0.0.0.0 > "$LOG_DIR/app.log" 2>&1 &
 
 # 获取进程ID
 PID=$!
