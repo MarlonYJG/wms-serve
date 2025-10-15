@@ -7,6 +7,12 @@ SET @yday  := DATE_SUB(@today, INTERVAL 1 DAY);
 
 -- 可重复执行：清空与重建
 SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE settlement_item;
+TRUNCATE TABLE settlement;
+TRUNCATE TABLE outbound_charge;
+TRUNCATE TABLE charge_dict;
+TRUNCATE TABLE quote_item;
+TRUNCATE TABLE quote;
 TRUNCATE TABLE picking_task;
 TRUNCATE TABLE outbound_order_item;
 TRUNCATE TABLE outbound_order;
@@ -170,3 +176,36 @@ JOIN (
 SET sl.status = 2,
     sl.current_volume = t.qty;
 
+
+-- 5) 财务结算与费用
+-- 费用项字典
+INSERT INTO charge_dict (charge_code, charge_name, default_tax_rate, is_enabled, remark, created_time) VALUES
+('FREIGHT', '运费', 0.00, 1, '快递/物流', CONCAT(@today,' 09:30:00')),
+('INSTALL', '安装费', 0.00, 1, '上门安装', CONCAT(@today,' 09:30:00')),
+('INSURE',  '保险费', 0.00, 1, '保价',     CONCAT(@today,' 09:30:00'));
+
+-- 出库费用：为 OUT001、OUT002 补充费用
+INSERT INTO outbound_charge (outbound_order_id, charge_type, amount, tax_rate, currency, remark, created_time) VALUES
+(1, 1, 28.00, NULL, 'CNY', '运费-顺丰', CONCAT(@today,' 09:35:00')),
+(2, 1, 18.00, NULL, 'CNY', '运费-京东', CONCAT(@today,' 09:36:00')),
+(2, 3,  3.00, NULL, 'CNY', '保价费',    CONCAT(@today,' 09:36:30'));
+
+-- 结算单（客户1：京东商城），包含 OUT001、OUT002
+INSERT INTO settlement (settlement_no, customer_id, period_start, period_end, status, currency, amount_goods, amount_charges, amount_total, remark, created_time) VALUES
+('SET' || DATE_FORMAT(@today,'%Y%m%d') || '001', 1, @today, @today, 3, 'CNY', 0.00, 49.00, 49.00, '演示结算单', CONCAT(@today,' 10:00:00'));
+
+-- 结算明细（示例商品金额用0，仅演示费用聚合；真实可按订单商品金额填充）
+INSERT INTO settlement_item (settlement_id, outbound_order_id, amount_goods, amount_charges, amount_total, remark, created_time) VALUES
+(1, 1, 0.00, 28.00, 28.00, 'OUT001 费用', CONCAT(@today,' 10:02:00')),
+(1, 2, 0.00, 21.00, 21.00, 'OUT002 费用', CONCAT(@today,' 10:03:00'));
+
+
+-- 6) 销售报价
+-- 报价单：客户2（天猫超市），有效期今日起三天
+INSERT INTO quote (quote_no, customer_id, currency, valid_from, valid_to, status, amount_total, remark, created_time)
+VALUES (CONCAT('Q', DATE_FORMAT(@today,'%Y%m%d'),'001'), 2, 'CNY', @today, DATE_ADD(@today, INTERVAL 3 DAY), 3, 0.00, '标准报价', CONCAT(@today,' 11:00:00'));
+
+-- 报价明细：SKU1001/1002
+INSERT INTO quote_item (quote_id, product_sku_id, quantity, unit_price, discount_rate, tax_rate, amount_subtotal, remark, created_time) VALUES
+(1, 1, 10, 99.00, 0.00, NULL, 990.00, '手环', CONCAT(@today,' 11:05:00')),
+(1, 2,  8, 129.00, 5.00, NULL, 980.40, '耳机(95折)', CONCAT(@today,' 11:06:00'));

@@ -348,5 +348,3 @@ java -jar target/wms-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 MIT License
 
 ---
-
-**注意**: 这是一个学习项目，生产环境使用前请根据实际需求进行安全加固和性能优化。

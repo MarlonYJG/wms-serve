@@ -3,6 +3,10 @@
 -- 完整重建：删除所有已存在表（先禁用外键约束，按依赖顺序删除）
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `quote_item`;
+
+DROP TABLE IF EXISTS `quote`;
+
 DROP TABLE IF EXISTS `picking_task`;
 
 DROP TABLE IF EXISTS `outbound_order_item`;
@@ -108,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `storage_zone` (
     `warehouse_id` BIGINT NOT NULL COMMENT '所属仓库ID',
     `zone_code` VARCHAR(50) NOT NULL COMMENT '库区编码',
     `zone_name` VARCHAR(100) NOT NULL COMMENT '库区名称',
-    `zone_type` TINYINT NOT NULL COMMENT '库区类型（1存储 2收货 3发货 6拣货...）',
+    `zone_type` INT NOT NULL COMMENT '库区类型（1存储 2收货 3发货 6拣货...）',
     `capacity` DECIMAL(12, 2) NULL COMMENT '库区容量',
     `used_capacity` DECIMAL(12, 2) NULL COMMENT '已用容量',
     `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
@@ -172,7 +176,7 @@ CREATE TABLE IF NOT EXISTS `inbound_order` (
     `order_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '入库单号',
     `warehouse_id` BIGINT NOT NULL COMMENT '目标仓库',
     `supplier_id` BIGINT NOT NULL COMMENT '供应商',
-    `status` TINYINT NOT NULL COMMENT '状态（1：待收货， 2：部分收货， 3：已完成， 4：已取消）',
+    `status` INT NOT NULL COMMENT '状态（1：待收货， 2：部分收货， 3：已完成， 4：已取消）',
     `total_expected_quantity` INT COMMENT '预期总数量',
     `total_received_quantity` INT DEFAULT 0 COMMENT '实际收货总数量',
     FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`),
@@ -207,7 +211,7 @@ CREATE TABLE IF NOT EXISTS `inbound_appointment` (
     `warehouse_id` BIGINT NOT NULL,
     `supplier_id` BIGINT NOT NULL,
     `expected_arrival_time` DATETIME NULL,
-    `status` TINYINT NOT NULL COMMENT '1待确认 2已确认 3已取消',
+    `status` INT NOT NULL COMMENT '1待确认 2已确认 3已取消',
     `remark` VARCHAR(255),
     FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`),
     FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`)
@@ -222,7 +226,7 @@ CREATE TABLE IF NOT EXISTS `inbound_qc` (
     `updated_time` TIMESTAMP NULL,
     `deleted` TINYINT DEFAULT 0,
     `inbound_order_item_id` BIGINT NOT NULL,
-    `status` TINYINT NOT NULL COMMENT '1待质检 2已完成',
+    `status` INT NOT NULL COMMENT '1待质检 2已完成',
     `qualified_quantity` INT DEFAULT 0,
     `unqualified_quantity` INT DEFAULT 0,
     `remark` VARCHAR(255),
@@ -242,7 +246,7 @@ CREATE TABLE IF NOT EXISTS `putaway_task` (
     `from_location_id` BIGINT COMMENT '来源库位（通常是收货暂存区）',
     `to_location_id` BIGINT NOT NULL COMMENT '目标上架库位',
     `quantity` INT NOT NULL COMMENT '上架数量',
-    `status` TINYINT DEFAULT 1 COMMENT '状态（1：待执行， 2：已完成）',
+    `status` INT DEFAULT 1 COMMENT '状态（1：待执行， 2：已完成）',
     `operator` INT COMMENT '操作员',
     `completed_time` DATETIME,
     FOREIGN KEY (`inbound_order_item_id`) REFERENCES `inbound_order_item` (`id`),
@@ -353,6 +357,115 @@ CREATE TABLE IF NOT EXISTS `picking_task` (
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`),
     FOREIGN KEY (`from_location_id`) REFERENCES `storage_location` (`id`)
 ) COMMENT='拣货任务表';
+
+-- 出库费用表
+CREATE TABLE IF NOT EXISTS `outbound_charge` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `outbound_order_id` BIGINT NOT NULL,
+    `charge_type` INT NOT NULL COMMENT '费用类型（1运费 2安装费 3保险费 99其他）',
+    `amount` DECIMAL(12, 2) NOT NULL,
+    `tax_rate` DECIMAL(5, 2) NULL,
+    `currency` VARCHAR(10) DEFAULT 'CNY',
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`)
+) COMMENT='出库费用表';
+
+-- 费用项字典表
+CREATE TABLE IF NOT EXISTS `charge_dict` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `charge_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '费用编码，如 FREIGHT',
+    `charge_name` VARCHAR(100) NOT NULL COMMENT '费用名称',
+    `default_tax_rate` DECIMAL(5, 2) NULL,
+    `is_enabled` TINYINT DEFAULT 1 COMMENT '是否启用',
+    `remark` VARCHAR(255)
+) COMMENT='费用项字典表';
+
+-- 结算主表
+CREATE TABLE IF NOT EXISTS `settlement` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `settlement_no` VARCHAR(50) NOT NULL UNIQUE,
+    `customer_id` BIGINT NOT NULL,
+    `period_start` DATETIME NULL,
+    `period_end` DATETIME NULL,
+    `status` INT NOT NULL COMMENT '1草稿 2待审核 3已审核 4已结清 5已作废',
+    `currency` VARCHAR(10) DEFAULT 'CNY',
+    `amount_goods` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `amount_charges` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `amount_total` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
+) COMMENT='结算主表';
+
+-- 结算明细表
+CREATE TABLE IF NOT EXISTS `settlement_item` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `settlement_id` BIGINT NOT NULL,
+    `outbound_order_id` BIGINT NOT NULL,
+    `amount_goods` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `amount_charges` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `amount_total` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`settlement_id`) REFERENCES `settlement` (`id`),
+    FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`)
+) COMMENT='结算明细表';
+
+-- 6. 销售/报价表
+CREATE TABLE IF NOT EXISTS `quote` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `quote_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '报价单号',
+    `customer_id` BIGINT NOT NULL,
+    `currency` VARCHAR(10) DEFAULT 'CNY',
+    `valid_from` DATETIME NOT NULL,
+    `valid_to` DATETIME NOT NULL,
+    `status` INT NOT NULL COMMENT '1草稿 2待审核 3已生效 4已失效 5已作废',
+    `amount_total` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
+) COMMENT='报价单主表';
+
+CREATE TABLE IF NOT EXISTS `quote_item` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `quote_id` BIGINT NOT NULL,
+    `product_sku_id` BIGINT NOT NULL,
+    `quantity` INT NOT NULL,
+    `unit_price` DECIMAL(12, 2) NOT NULL,
+    `discount_rate` DECIMAL(5, 2) NOT NULL DEFAULT 0 COMMENT '折扣%（0-100）',
+    `tax_rate` DECIMAL(5, 2) NULL COMMENT '税率%（0-100）',
+    `amount_subtotal` DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`quote_id`) REFERENCES `quote` (`id`),
+    FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
+) COMMENT='报价单明细表';
 
 -- 5. 用户与权限表（保留）
 CREATE TABLE IF NOT EXISTS `users` (
