@@ -14,12 +14,12 @@ public final class InboundOrderItemMapper {
         dto.setProductSkuId(entity.getProductSkuId());
         dto.setExpectedQuantity(entity.getExpectedQuantity());
         dto.setReceivedQuantity(entity.getReceivedQuantity());
-        if (entity.getCreatedTime() != null) {
-            dto.setCreatedTime(entity.getCreatedTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
-        }
-        if (entity.getUpdatedTime() != null) {
-            dto.setUpdatedTime(entity.getUpdatedTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
-        }
+        dto.setUnitPrice(entity.getUnitPrice());
+        dto.setBatchNo(entity.getBatchNo());
+        dto.setProductionDate(entity.getProductionDate());
+        dto.setExpiryDate(entity.getExpiryDate());
+        dto.setCreatedTime(entity.getCreatedTime());
+        dto.setUpdatedTime(entity.getUpdatedTime());
         return dto;
     }
 
@@ -31,6 +31,12 @@ public final class InboundOrderItemMapper {
         entity.setProductSkuId(dto.getProductSkuId());
         entity.setExpectedQuantity(dto.getExpectedQuantity());
         entity.setReceivedQuantity(dto.getReceivedQuantity());
+        entity.setUnitPrice(dto.getUnitPrice());
+        entity.setBatchNo(dto.getBatchNo());
+        entity.setProductionDate(dto.getProductionDate());
+        entity.setExpiryDate(dto.getExpiryDate());
+        entity.setCreatedTime(dto.getCreatedTime());
+        entity.setUpdatedTime(dto.getUpdatedTime());
         return entity;
     }
 }

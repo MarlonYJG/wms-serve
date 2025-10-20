@@ -1,24 +1,27 @@
 package com.bj.wms.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
-public class InboundOrderItemDTO {
-    private Long id;
-    private Long inboundOrderId;
+public class InboundAppointmentItemCreateRequest {
+    
+    @NotNull
     private Long productSkuId;
-    private String productSkuCode;
-    private String productSkuName;
+    
+    @NotNull
+    @Positive
     private Integer expectedQuantity;
-    private Integer receivedQuantity;
+    
     private BigDecimal unitPrice;
+    
     private String batchNo;
+    
     private LocalDate productionDate;
+    
     private LocalDate expiryDate;
-    private LocalDateTime createdTime;
-    private LocalDateTime updatedTime;
 }

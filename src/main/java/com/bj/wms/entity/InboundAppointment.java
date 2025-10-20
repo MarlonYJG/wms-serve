@@ -8,7 +8,10 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -29,16 +32,42 @@ public class InboundAppointment extends BaseEntity {
     @Column(name = "supplier_id", nullable = false)
     private Long supplierId;
 
-    @Column(name = "expected_arrival_time")
-    private LocalDateTime expectedArrivalTime;
+    @NotNull
+    @Column(name = "appointment_date", nullable = false)
+    private LocalDate appointmentDate;
+
+    @NotNull
+    @Column(name = "appointment_time_start", nullable = false)
+    private LocalTime appointmentTimeStart;
+
+    @NotNull
+    @Column(name = "appointment_time_end", nullable = false)
+    private LocalTime appointmentTimeEnd;
 
     @Convert(converter = AppointmentStatusConverter.class)
     @Column(name = "status", nullable = false)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
+    @Column(name = "total_expected_quantity")
+    private Integer totalExpectedQuantity;
+
+    @Size(max = 500)
+    @Column(name = "special_requirements", length = 500)
+    private String specialRequirements;
+
+    @Column(name = "approved_by")
+    private Long approvedBy;
+
+    @Column(name = "approved_time")
+    private LocalDateTime approvedTime;
+
     @Size(max = 255)
     @Column(name = "remark", length = 255)
     private String remark;
+
+    // 关联关系
+    @OneToMany(mappedBy = "inboundAppointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InboundAppointmentItem> appointmentItems;
 }
 
 

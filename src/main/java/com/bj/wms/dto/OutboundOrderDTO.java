@@ -1,26 +1,25 @@
 package com.bj.wms.dto;
 
-import com.bj.wms.entity.InboundStatus;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 出库单DTO
+ */
 @Data
-public class InboundOrderDTO {
+public class OutboundOrderDTO {
     private Long id;
     private String orderNo;
     private Long warehouseId;
     private String warehouseName;
-    private Long supplierId;
-    private String supplierName;
-    private InboundStatus status;
+    private Long customerId;
+    private String customerName;
+    private Integer status;
     private String statusName;
-    private Integer totalExpectedQuantity;
-    private Integer totalReceivedQuantity;
+    private String customerInfo;
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
-    
-    // 明细列表
-    private List<InboundOrderItemDTO> items;
+    private List<OutboundOrderItemDTO> items;
 }

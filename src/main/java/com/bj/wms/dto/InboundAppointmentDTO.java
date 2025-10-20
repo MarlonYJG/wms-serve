@@ -6,7 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @Data
 public class InboundAppointmentDTO {
@@ -18,19 +21,46 @@ public class InboundAppointmentDTO {
 
     @NotNull
     private Long warehouseId;
+    
+    private String warehouseName;
 
     @NotNull
     private Long supplierId;
+    
+    private String supplierName;
 
-    private LocalDateTime expectedArrivalTime;
+    @NotNull
+    private LocalDate appointmentDate;
+
+    @NotNull
+    private LocalTime appointmentTimeStart;
+
+    @NotNull
+    private LocalTime appointmentTimeEnd;
 
     private AppointmentStatus status;
+    
+    private String statusName;
 
+    private Integer totalExpectedQuantity;
+
+    @Size(max = 500)
+    private String specialRequirements;
+
+    private Long approvedBy;
+    
+    private String approvedByName;
+
+    private LocalDateTime approvedTime;
+
+    @Size(max = 255)
     private String remark;
 
-    private Long createdTime;
+    private LocalDateTime createdTime;
 
-    private Long updatedTime;
+    private LocalDateTime updatedTime;
+    
+    private List<InboundAppointmentItemDTO> appointmentItems;
 }
 
 

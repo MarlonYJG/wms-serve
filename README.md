@@ -316,6 +316,31 @@ mvn clean package
 java -jar target/wms-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
+## 📚 开发规范文档
+
+为了确保开发质量和避免常见问题，请务必阅读以下规范文档：
+
+- **[开发规范文档](../docs/development-standards.md)** - 完整的开发规范和最佳实践
+- **[快速参考](../docs/quick-reference.md)** - 常见问题快速修复指南
+- **[问题解决模板](../docs/issue-resolution-template.md)** - 问题记录和解决模板
+
+### 新模块开发必读
+
+每次开发新模块时，请严格按照以下检查清单执行：
+
+#### 后端开发检查清单
+- [ ] API 路径使用单数形式，与前端保持一致
+- [ ] 返回统一的 `PageResult<T>` 结构
+- [ ] 添加时间解析异常处理
+- [ ] 提供带关联查询的 Repository 方法
+- [ ] DTO 包含必要的冗余字段（如 `warehouseName`）
+
+#### 前端开发检查清单
+- [ ] 定义完整的 TypeScript 类型
+- [ ] 导入 `PageResult` 类型
+- [ ] 使用 `res.content` 处理分页数据
+- [ ] 添加错误处理和加载状态
+
 ## 📞 支持
 
 如果你在开发过程中遇到问题，可以：
@@ -324,6 +349,7 @@ java -jar target/wms-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 2. 检查数据库连接配置
 3. 确认Java版本和Maven版本
 4. 查看API文档确认请求格式
+5. 参考开发规范文档解决常见问题
 
 ## 🔄 版本升级说明
 

@@ -27,6 +27,15 @@ public enum InboundStatus {
         }
         throw new IllegalArgumentException("未知的入库状态: " + code);
     }
+    
+    public String getDescription() {
+        return switch (this) {
+            case PENDING -> "待收货";
+            case PARTIAL -> "部分收货";
+            case COMPLETED -> "已完成";
+            case CANCELED -> "已取消";
+        };
+    }
 }
 
 

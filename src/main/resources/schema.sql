@@ -17,6 +17,10 @@ DROP TABLE IF EXISTS `inventory_transaction`;
 
 DROP TABLE IF EXISTS `inventory`;
 
+DROP TABLE IF EXISTS `inventory_count_item`;
+
+DROP TABLE IF EXISTS `inventory_count`;
+
 DROP TABLE IF EXISTS `putaway_task`;
 
 DROP TABLE IF EXISTS `inbound_order_item`;
@@ -195,6 +199,10 @@ CREATE TABLE IF NOT EXISTS `inbound_order_item` (
     `product_sku_id` BIGINT NOT NULL,
     `expected_quantity` INT NOT NULL COMMENT '预期数量',
     `received_quantity` INT DEFAULT 0 COMMENT '已收数量',
+    `unit_price` DECIMAL(10,2) COMMENT '单价',
+    `batch_no` VARCHAR(100) COMMENT '批次号',
+    `production_date` DATE COMMENT '生产日期',
+    `expiry_date` DATE COMMENT '过期日期',
     FOREIGN KEY (`inbound_order_id`) REFERENCES `inbound_order` (`id`),
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
 ) COMMENT='入库单明细表';
@@ -210,12 +218,37 @@ CREATE TABLE IF NOT EXISTS `inbound_appointment` (
     `appointment_no` VARCHAR(50) NOT NULL UNIQUE,
     `warehouse_id` BIGINT NOT NULL,
     `supplier_id` BIGINT NOT NULL,
-    `expected_arrival_time` DATETIME NULL,
-    `status` INT NOT NULL COMMENT '1待确认 2已确认 3已取消',
+    `appointment_date` DATE NOT NULL,
+    `appointment_time_start` TIME NOT NULL,
+    `appointment_time_end` TIME NOT NULL,
+    `status` INT NOT NULL COMMENT '1待审核 2已审核 3已拒绝 4已取消 5已完成',
+    `total_expected_quantity` INT DEFAULT 0,
+    `special_requirements` VARCHAR(500),
+    `approved_by` BIGINT,
+    `approved_time` TIMESTAMP NULL,
     `remark` VARCHAR(255),
     FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`),
     FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`)
 ) COMMENT='入库预约表';
+
+-- 入库预约明细表
+CREATE TABLE IF NOT EXISTS `inbound_appointment_item` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `appointment_id` BIGINT NOT NULL,
+    `product_sku_id` BIGINT NOT NULL,
+    `expected_quantity` INT NOT NULL,
+    `unit_price` DECIMAL(10,2),
+    `batch_no` VARCHAR(100),
+    `production_date` DATE,
+    `expiry_date` DATE,
+    FOREIGN KEY (`appointment_id`) REFERENCES `inbound_appointment` (`id`),
+    FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
+) COMMENT='入库预约明细表';
 
 -- 入库质检表
 CREATE TABLE IF NOT EXISTS `inbound_qc` (
@@ -281,6 +314,41 @@ CREATE TABLE IF NOT EXISTS `inventory` (
     FOREIGN KEY (`location_id`) REFERENCES `storage_location` (`id`),
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
 ) COMMENT='库存明细表';
+
+-- 盘点主表
+CREATE TABLE IF NOT EXISTS `inventory_count` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `count_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '盘点单号',
+    `warehouse_id` BIGINT NOT NULL,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1草稿 2进行中 3已提交 4已完成',
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`)
+) COMMENT='库存盘点主表';
+
+-- 盘点明细表
+CREATE TABLE IF NOT EXISTS `inventory_count_item` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `count_id` BIGINT NOT NULL,
+    `location_id` BIGINT NOT NULL,
+    `product_sku_id` BIGINT NOT NULL,
+    `batch_no` VARCHAR(100),
+    `system_qty` INT,
+    `counted_qty` INT,
+    `difference_qty` INT,
+    FOREIGN KEY (`count_id`) REFERENCES `inventory_count` (`id`),
+    FOREIGN KEY (`location_id`) REFERENCES `storage_location` (`id`),
+    FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
+) COMMENT='库存盘点明细表';
 
 CREATE TABLE IF NOT EXISTS `inventory_transaction` (
     `id` BIGINT PRIMARY KEY AUTO_INCREMENT,

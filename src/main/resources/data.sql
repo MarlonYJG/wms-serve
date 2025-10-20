@@ -21,6 +21,8 @@ TRUNCATE TABLE inventory;
 TRUNCATE TABLE putaway_task;
 TRUNCATE TABLE inbound_order_item;
 TRUNCATE TABLE inbound_order;
+TRUNCATE TABLE inbound_appointment_item;
+TRUNCATE TABLE inbound_appointment;
 TRUNCATE TABLE storage_location;
 TRUNCATE TABLE storage_zone;
 TRUNCATE TABLE product_sku;
@@ -61,7 +63,36 @@ INSERT INTO product_sku (sku_code, sku_name, specification, brand, category_id, 
 ('SKU1002', '蓝牙耳机', '降噪版',     '声浪', NULL, 1, '690000100002', 0.0300, 0.0006, 0, 0, NULL, 100, 1, CONCAT(@yday,' 09:20:00')),
 ('SKU1003', '有机大米', '5kg',        '稻香', NULL, 2, '690000100003', 5.0000, 0.0080, 1, 1, 365, 50, 1, CONCAT(@yday,' 09:20:00'));
 
--- 2) 入库域：构造 4 种状态（1待收货/2部分收货/3已完成/4已取消）
+-- 2) 预约入库域：构造 5 种状态（1待审核/2已审核/3已拒绝/4已取消/5已完成）
+INSERT INTO inbound_appointment (appointment_no, warehouse_id, supplier_id, appointment_date, appointment_time_start, appointment_time_end, status, total_expected_quantity, special_requirements, approved_by, approved_time, remark, created_time) VALUES
+-- 待审核（1）：今天创建
+(CONCAT('APT', DATE_FORMAT(@today,'%Y%m%d'),'001'), 1, 1, @today, '09:00:00', '11:00:00', 1, 100, '需要叉车协助卸货', NULL, NULL, NULL, CONCAT(@today,' 08:00:00')),
+-- 已审核（2）：昨天审核通过
+(CONCAT('APT', DATE_FORMAT(@yday,'%Y%m%d'),'002'), 1, 2, @yday, '14:00:00', '16:00:00', 2, 80, '需要冷藏车运输', 1, CONCAT(@yday,' 10:30:00'), '审核通过', CONCAT(@yday,' 09:00:00')),
+-- 已拒绝（3）：昨天拒绝
+(CONCAT('APT', DATE_FORMAT(@yday,'%Y%m%d'),'003'), 1, 1, @yday, '10:00:00', '12:00:00', 3, 50, NULL, 1, CONCAT(@yday,' 11:00:00'), '时间冲突，建议改期', CONCAT(@yday,' 08:30:00')),
+-- 已取消（4）：今天取消
+(CONCAT('APT', DATE_FORMAT(@today,'%Y%m%d'),'004'), 1, 2, @today, '15:00:00', '17:00:00', 4, 60, NULL, NULL, NULL, '供应商临时取消', CONCAT(@today,' 07:00:00')),
+-- 已完成（5）：昨天完成
+(CONCAT('APT', DATE_FORMAT(@yday,'%Y%m%d'),'005'), 1, 1, @yday, '08:00:00', '10:00:00', 5, 120, '需要特殊包装', 1, CONCAT(@yday,' 07:30:00'), '审核通过', CONCAT(@yday,' 07:00:00'));
+
+-- 预约商品明细
+INSERT INTO inbound_appointment_item (appointment_id, product_sku_id, expected_quantity, unit_price, batch_no, production_date, expiry_date, created_time) VALUES
+-- APT001 待审核
+(1, 1, 50, 99.00, 'BATCH-HR-002', @today, NULL, CONCAT(@today,' 08:05:00')),
+(1, 2, 50, 129.00, 'BATCH-EJ-002', @today, NULL, CONCAT(@today,' 08:05:00')),
+-- APT002 已审核
+(2, 3, 80, 25.00, 'BATCH-MI-002', @yday, DATE_ADD(@yday, INTERVAL 365 DAY), CONCAT(@yday,' 09:05:00')),
+-- APT003 已拒绝
+(3, 1, 30, 99.00, 'BATCH-HR-003', @yday, NULL, CONCAT(@yday,' 08:35:00')),
+(3, 2, 20, 129.00, 'BATCH-EJ-003', @yday, NULL, CONCAT(@yday,' 08:35:00')),
+-- APT004 已取消
+(4, 3, 60, 25.00, 'BATCH-MI-003', @today, DATE_ADD(@today, INTERVAL 365 DAY), CONCAT(@today,' 07:05:00')),
+-- APT005 已完成
+(5, 1, 60, 99.00, 'BATCH-HR-001', @yday, NULL, CONCAT(@yday,' 07:05:00')),
+(5, 2, 60, 129.00, 'BATCH-EJ-001', @yday, NULL, CONCAT(@yday,' 07:05:00'));
+
+-- 3) 入库域：构造 4 种状态（1待收货/2部分收货/3已完成/4已取消）
 -- 已完成（3）：昨日完成并上架
 INSERT INTO inbound_order (order_no, warehouse_id, supplier_id, status, total_expected_quantity, total_received_quantity, created_time) VALUES
 (CONCAT('IN', DATE_FORMAT(@yday,'%Y%m%d'),'001'), 1, 1, 3, 160, 160, CONCAT(@yday,' 10:00:00')),
@@ -192,7 +223,7 @@ INSERT INTO outbound_charge (outbound_order_id, charge_type, amount, tax_rate, c
 
 -- 结算单（客户1：京东商城），包含 OUT001、OUT002
 INSERT INTO settlement (settlement_no, customer_id, period_start, period_end, status, currency, amount_goods, amount_charges, amount_total, remark, created_time) VALUES
-('SET' || DATE_FORMAT(@today,'%Y%m%d') || '001', 1, @today, @today, 3, 'CNY', 0.00, 49.00, 49.00, '演示结算单', CONCAT(@today,' 10:00:00'));
+(CONCAT('SET', DATE_FORMAT(@today,'%Y%m%d'), '001'), 1, @today, @today, 3, 'CNY', 0.00, 49.00, 49.00, '演示结算单', CONCAT(@today,' 10:00:00'));
 
 -- 结算明细（示例商品金额用0，仅演示费用聚合；真实可按订单商品金额填充）
 INSERT INTO settlement_item (settlement_id, outbound_order_id, amount_goods, amount_charges, amount_total, remark, created_time) VALUES

@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "inbound_order")
@@ -36,6 +38,10 @@ public class InboundOrder extends BaseEntity {
 
     @Column(name = "total_received_quantity")
     private Integer totalReceivedQuantity = 0;
+
+    // 关联关系
+    @OneToMany(mappedBy = "inboundOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InboundOrderItem> orderItems;
 }
 
 

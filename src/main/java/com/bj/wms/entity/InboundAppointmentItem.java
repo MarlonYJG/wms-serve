@@ -10,13 +10,13 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "inbound_order_item")
+@Table(name = "inbound_appointment_item")
 @EqualsAndHashCode(callSuper = true)
-public class InboundOrderItem extends BaseEntity {
+public class InboundAppointmentItem extends BaseEntity {
 
     @NotNull
-    @Column(name = "inbound_order_id", nullable = false)
-    private Long inboundOrderId;
+    @Column(name = "appointment_id", nullable = false)
+    private Long appointmentId;
 
     @NotNull
     @Column(name = "product_sku_id", nullable = false)
@@ -26,13 +26,10 @@ public class InboundOrderItem extends BaseEntity {
     @Column(name = "expected_quantity", nullable = false)
     private Integer expectedQuantity;
 
-    @Column(name = "received_quantity")
-    private Integer receivedQuantity = 0;
-
     @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(name = "batch_no")
+    @Column(name = "batch_no", length = 100)
     private String batchNo;
 
     @Column(name = "production_date")
@@ -43,12 +40,10 @@ public class InboundOrderItem extends BaseEntity {
 
     // 关联关系
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inbound_order_id", insertable = false, updatable = false)
-    private InboundOrder inboundOrder;
+    @JoinColumn(name = "appointment_id", insertable = false, updatable = false)
+    private InboundAppointment inboundAppointment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_sku_id", insertable = false, updatable = false)
     private ProductSku productSku;
 }
-
-
