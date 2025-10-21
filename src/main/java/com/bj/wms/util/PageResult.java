@@ -17,4 +17,9 @@ public class PageResult<T> {
         this.data = data;
         this.total = total;
     }
+    
+    public PageResult(List<T> data, int page, int size, long total) {
+        this.data = data;
+        this.total = total;
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrderItem, Long> {
     
@@ -13,4 +14,6 @@ public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrder
     
     @Query("SELECT oi FROM OutboundOrderItem oi WHERE oi.outboundOrderId = :outboundOrderId AND oi.productSkuId = :productSkuId")
     Optional<OutboundOrderItem> findByOutboundOrderIdAndProductSkuId(@Param("outboundOrderId") Long outboundOrderId, @Param("productSkuId") Long productSkuId);
+    
+    void deleteByOutboundOrderId(Long outboundOrderId);
 }

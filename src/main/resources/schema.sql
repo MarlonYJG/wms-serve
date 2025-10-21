@@ -325,7 +325,7 @@ CREATE TABLE IF NOT EXISTS `inventory_count` (
     `deleted` TINYINT DEFAULT 0,
     `count_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '盘点单号',
     `warehouse_id` BIGINT NOT NULL,
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1草稿 2进行中 3已提交 4已完成',
+    `status` INT NOT NULL DEFAULT 1 COMMENT '1草稿 2进行中 3已提交 4已完成',
     `remark` VARCHAR(255),
     FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`)
 ) COMMENT='库存盘点主表';
@@ -361,7 +361,7 @@ CREATE TABLE IF NOT EXISTS `inventory_transaction` (
     `batch_no` VARCHAR(100),
     `warehouse_id` BIGINT NOT NULL,
     `location_id` BIGINT NOT NULL,
-    `transaction_type` TINYINT NOT NULL COMMENT '流水类型（1：入库， 2：出库， 3：移库， 4：盘点调整）',
+    `transaction_type` INT NOT NULL COMMENT '流水类型（1：入库， 2：出库， 3：移库， 4：盘点调整）',
     `related_order_no` VARCHAR(100) COMMENT '关联业务单号',
     `quantity_change` INT NOT NULL COMMENT '数量变化（正数为增，负数为减）',
     `quantity_after` INT NOT NULL COMMENT '变化后结余数量',
@@ -384,7 +384,7 @@ CREATE TABLE IF NOT EXISTS `outbound_order` (
     `order_no` VARCHAR(50) NOT NULL UNIQUE,
     `warehouse_id` BIGINT NOT NULL,
     `customer_id` BIGINT NOT NULL,
-    `status` TINYINT NOT NULL COMMENT '状态（1：待处理， 2：已分配库存， 3：拣货中， 4：已发货）',
+    `status` INT NOT NULL COMMENT '状态（1：待处理， 2：已分配库存， 3：拣货中， 4：已发货）',
     `customer_info` VARCHAR(500) COMMENT '客户信息',
     FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`),
     FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
@@ -419,7 +419,7 @@ CREATE TABLE IF NOT EXISTS `picking_task` (
     `product_sku_id` BIGINT NOT NULL,
     `from_location_id` BIGINT NOT NULL COMMENT '拣货库位',
     `quantity` INT NOT NULL COMMENT '需拣选数量',
-    `status` TINYINT DEFAULT 1 COMMENT '状态（1：待拣选， 2：部分完成， 3：已完成）',
+    `status` INT DEFAULT 1 COMMENT '状态（1：待拣选， 2：部分完成， 3：已完成）',
     `picked_quantity` INT DEFAULT 0,
     FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`),
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`),
@@ -548,6 +548,6 @@ CREATE TABLE IF NOT EXISTS `users` (
     `real_name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100),
     `phone` VARCHAR(20),
-    `status` TINYINT NOT NULL,
+    `status` INT NOT NULL,
     `role` VARCHAR(20) NOT NULL
 ) COMMENT='用户表';
