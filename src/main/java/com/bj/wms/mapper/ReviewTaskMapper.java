@@ -1,31 +1,32 @@
 package com.bj.wms.mapper;
 
-import com.bj.wms.dto.PickingTaskDTO;
-import com.bj.wms.entity.PickingTask;
+import com.bj.wms.dto.ReviewTaskDTO;
+import com.bj.wms.entity.ReviewTask;
 import org.springframework.stereotype.Component;
 
 /**
- * 拣货任务映射器
+ * 复核任务映射器
  */
 @Component
-public class PickingTaskMapper {
+public class ReviewTaskMapper {
 
-    public static PickingTaskDTO toDTO(PickingTask entity) {
+    public static ReviewTaskDTO toDTO(ReviewTask entity) {
         if (entity == null) {
             return null;
         }
 
-        PickingTaskDTO dto = new PickingTaskDTO();
+        ReviewTaskDTO dto = new ReviewTaskDTO();
         dto.setId(entity.getId());
         dto.setTaskNo(entity.getTaskNo());
-        dto.setWaveNo(entity.getWaveNo());
-        dto.setPickingWaveId(entity.getPickingWaveId());
         dto.setOutboundOrderId(entity.getOutboundOrderId());
         dto.setProductSkuId(entity.getProductSkuId());
-        dto.setFromLocationId(entity.getFromLocationId());
-        dto.setQuantity(entity.getQuantity());
+        dto.setExpectedQuantity(entity.getExpectedQuantity());
+        dto.setActualQuantity(entity.getActualQuantity());
         dto.setStatus(entity.getStatus());
-        dto.setPickedQuantity(entity.getPickedQuantity());
+        dto.setReviewerId(entity.getReviewerId());
+        dto.setReviewerName(entity.getReviewerName());
+        dto.setReviewTime(entity.getReviewTime());
+        dto.setRemark(entity.getRemark());
         dto.setCreatedTime(entity.getCreatedTime());
         dto.setUpdatedTime(entity.getUpdatedTime());
 
@@ -36,9 +37,6 @@ public class PickingTaskMapper {
         if (entity.getProductSku() != null) {
             dto.setProductName(entity.getProductSku().getSkuName());
             dto.setSkuCode(entity.getProductSku().getSkuCode());
-        }
-        if (entity.getFromLocation() != null) {
-            dto.setFromLocationCode(entity.getFromLocation().getLocationCode());
         }
 
         // 设置状态名称
@@ -52,9 +50,10 @@ public class PickingTaskMapper {
             return "未知";
         }
         return switch (status) {
-            case 1 -> "待拣选";
-            case 2 -> "部分完成";
-            case 3 -> "已完成";
+            case 1 -> "待复核";
+            case 2 -> "复核中";
+            case 3 -> "复核完成";
+            case 4 -> "复核异常";
             default -> "未知";
         };
     }

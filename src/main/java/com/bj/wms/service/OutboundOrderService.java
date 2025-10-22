@@ -43,6 +43,7 @@ public class OutboundOrderService {
     /**
      * 分页查询出库单列表
      */
+    @Transactional(readOnly = true)
     public PageResult<OutboundOrderDTO> getOrderList(OutboundOrderQueryRequest request) {
         // 构建查询条件
         Specification<OutboundOrder> spec = (root, query, cb) -> {
@@ -94,6 +95,7 @@ public class OutboundOrderService {
     /**
      * 获取出库单详情
      */
+    @Transactional(readOnly = true)
     public OutboundOrderDTO getOrderDetail(Long id) {
         OutboundOrder order = outboundOrderRepository.findByIdWithItems(id)
             .orElseThrow(() -> new RuntimeException("出库单不存在"));

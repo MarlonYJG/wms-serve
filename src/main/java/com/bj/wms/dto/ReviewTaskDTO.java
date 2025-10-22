@@ -5,25 +5,25 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 拣货任务DTO
+ * 复核任务DTO
  */
 @Data
-public class PickingTaskDTO {
+public class ReviewTaskDTO {
     private Long id;
     private String taskNo;
-    private String waveNo;
-    private Long pickingWaveId;
     private Long outboundOrderId;
     private String outboundOrderNo;
     private Long productSkuId;
     private String productName;
     private String skuCode;
-    private Long fromLocationId;
-    private String fromLocationCode;
-    private Integer quantity;
+    private Integer expectedQuantity;
+    private Integer actualQuantity;
     private Integer status;
     private String statusName;
-    private Integer pickedQuantity;
+    private Long reviewerId;
+    private String reviewerName;
+    private LocalDateTime reviewTime;
+    private String remark;
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
 }

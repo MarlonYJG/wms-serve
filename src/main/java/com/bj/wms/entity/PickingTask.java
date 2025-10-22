@@ -23,6 +23,9 @@ public class PickingTask extends BaseEntity {
     @Column(name = "wave_no", length = 50)
     private String waveNo; // 波次号
 
+    @Column(name = "picking_wave_id")
+    private Long pickingWaveId; // 波次ID
+
     @Column(name = "outbound_order_id", nullable = false)
     private Long outboundOrderId;
 
@@ -53,4 +56,8 @@ public class PickingTask extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_location_id", insertable = false, updatable = false)
     private StorageLocation fromLocation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "picking_wave_id", insertable = false, updatable = false)
+    private PickingWave pickingWave;
 }

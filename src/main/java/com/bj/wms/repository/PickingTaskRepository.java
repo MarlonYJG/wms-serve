@@ -1,6 +1,9 @@
 package com.bj.wms.repository;
 
 import com.bj.wms.entity.PickingTask;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +27,12 @@ public interface PickingTaskRepository extends JpaRepository<PickingTask, Long>,
     
     @Query("SELECT pt FROM PickingTask pt WHERE pt.outboundOrderId = :outboundOrderId AND pt.productSkuId = :productSkuId")
     List<PickingTask> findByOutboundOrderIdAndProductSkuId(@Param("outboundOrderId") Long outboundOrderId, @Param("productSkuId") Long productSkuId);
+    
+    @EntityGraph(attributePaths = {"outboundOrder", "productSku", "fromLocation", "pickingWave"})
+    @Query("SELECT pt FROM PickingTask pt WHERE pt.id = :id")
+    Optional<PickingTask> findByIdWithDetails(@Param("id") Long id);
+    
+    @Override
+    @EntityGraph(attributePaths = {"outboundOrder", "productSku", "fromLocation", "pickingWave"})
+    Page<PickingTask> findAll(org.springframework.data.jpa.domain.Specification<PickingTask> spec, Pageable pageable);
 }

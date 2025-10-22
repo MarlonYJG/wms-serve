@@ -14,6 +14,8 @@ TRUNCATE TABLE charge_dict;
 TRUNCATE TABLE quote_item;
 TRUNCATE TABLE quote;
 TRUNCATE TABLE picking_task;
+TRUNCATE TABLE picking_wave;
+TRUNCATE TABLE review_task;
 TRUNCATE TABLE outbound_order_item;
 TRUNCATE TABLE outbound_order;
 TRUNCATE TABLE inventory_transaction;
@@ -157,12 +159,25 @@ INSERT INTO outbound_order_item (outbound_order_id, product_sku_id, quantity, al
 -- 待处理：未分配
 (4,2, 4, 0, 0,  CONCAT(@today,' 09:16:00'));
 
+-- 拣货波次（1待执行/2执行中/3已完成）
+INSERT INTO picking_wave (wave_no, warehouse_id, status, order_count, task_count, completed_task_count, started_time, completed_time, operator_name, remark, created_time) VALUES
+('WAVE001', 1, 3, 1, 2, 2, CONCAT(@today,' 09:10:00'), CONCAT(@today,' 10:30:00'), '张三', '第一批拣货波次', CONCAT(@today,' 09:00:00')),
+('WAVE002', 1, 2, 1, 1, 0, CONCAT(@today,' 09:12:00'), NULL, '李四', '第二批拣货波次', CONCAT(@today,' 09:05:00')),
+('WAVE003', 1, 1, 1, 1, 0, NULL, NULL, NULL, '第三批拣货波次', CONCAT(@today,' 09:10:00'));
+
 -- 拣货任务（1待拣货/2部分完成/3已完成）
-INSERT INTO picking_task (task_no, wave_no, outbound_order_id, product_sku_id, from_location_id, quantity, status, picked_quantity, created_time) VALUES
-(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'001'),'WAVE001',1,1,2,10,3,10,CONCAT(@today,' 09:10:00')),
-(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'002'),'WAVE001',1,2,3, 8,3, 8,CONCAT(@today,' 09:10:00')),
-(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'003'),'WAVE002',2,3,2,12,2, 6,CONCAT(@today,' 09:12:00')),
-(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'004'),'WAVE003',3,1,2, 5,1, 0,CONCAT(@today,' 09:13:00'));
+INSERT INTO picking_task (task_no, wave_no, picking_wave_id, outbound_order_id, product_sku_id, from_location_id, quantity, status, picked_quantity, created_time) VALUES
+(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'001'),'WAVE001',1,1,1,2,10,3,10,CONCAT(@today,' 09:10:00')),
+(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'002'),'WAVE001',1,1,2,3, 8,3, 8,CONCAT(@today,' 09:10:00')),
+(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'003'),'WAVE002',2,2,3,2,12,2, 6,CONCAT(@today,' 09:12:00')),
+(CONCAT('PICK',DATE_FORMAT(@today,'%Y%m%d'),'004'),'WAVE003',3,3,1,2, 5,1, 0,CONCAT(@today,' 09:13:00'));
+
+-- 复核任务（1待复核/2复核中/3复核完成/4复核异常）
+INSERT INTO review_task (task_no, outbound_order_id, product_sku_id, expected_quantity, actual_quantity, status, reviewer_name, review_time, remark, created_time) VALUES
+(CONCAT('REV',DATE_FORMAT(@today,'%Y%m%d'),'001'),1,1,10,10,3,'张三',CONCAT(@today,' 11:00:00'),'复核通过',CONCAT(@today,' 10:30:00')),
+(CONCAT('REV',DATE_FORMAT(@today,'%Y%m%d'),'002'),1,2, 8, 8,3,'李四',CONCAT(@today,' 11:15:00'),'复核通过',CONCAT(@today,' 10:35:00')),
+(CONCAT('REV',DATE_FORMAT(@today,'%Y%m%d'),'003'),2,3,12,10,4,'王五',CONCAT(@today,' 11:30:00'),'数量不符',CONCAT(@today,' 10:40:00')),
+(CONCAT('REV',DATE_FORMAT(@today,'%Y%m%d'),'004'),3,1, 5, 0,1,NULL,NULL,NULL,CONCAT(@today,' 10:45:00'));
 
 -- 锁定与扣减：已分配但未拣的，锁定库存
 UPDATE inventory SET locked_quantity = locked_quantity + 5 WHERE warehouse_id=1 AND location_id=2 AND product_sku_id=1; -- OUT003 分配未拣

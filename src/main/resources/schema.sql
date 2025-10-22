@@ -9,6 +9,10 @@ DROP TABLE IF EXISTS `quote`;
 
 DROP TABLE IF EXISTS `picking_task`;
 
+DROP TABLE IF EXISTS `picking_wave`;
+
+DROP TABLE IF EXISTS `review_task`;
+
 DROP TABLE IF EXISTS `outbound_order_item`;
 
 DROP TABLE IF EXISTS `outbound_order`;
@@ -406,6 +410,28 @@ CREATE TABLE IF NOT EXISTS `outbound_order_item` (
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
 ) COMMENT='出库单明细表';
 
+-- 拣货波次表
+CREATE TABLE IF NOT EXISTS `picking_wave` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `wave_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '波次号',
+    `warehouse_id` BIGINT NOT NULL COMMENT '仓库ID',
+    `status` INT DEFAULT 1 COMMENT '状态（1：待执行，2：执行中，3：已完成）',
+    `order_count` INT DEFAULT 0 COMMENT '包含的订单数量',
+    `task_count` INT DEFAULT 0 COMMENT '包含的任务数量',
+    `completed_task_count` INT DEFAULT 0 COMMENT '已完成的任务数量',
+    `started_time` TIMESTAMP NULL COMMENT '开始执行时间',
+    `completed_time` TIMESTAMP NULL COMMENT '完成时间',
+    `operator_id` BIGINT COMMENT '操作员ID',
+    `operator_name` VARCHAR(50) COMMENT '操作员姓名',
+    `remark` VARCHAR(500) COMMENT '备注',
+    FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`)
+) COMMENT='拣货波次表';
+
 CREATE TABLE IF NOT EXISTS `picking_task` (
     `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
     `created_by` VARCHAR(50),
@@ -415,16 +441,40 @@ CREATE TABLE IF NOT EXISTS `picking_task` (
     `deleted` TINYINT DEFAULT 0,
     `task_no` VARCHAR(50) NOT NULL UNIQUE,
     `wave_no` VARCHAR(50) COMMENT '波次号',
+    `picking_wave_id` BIGINT COMMENT '波次ID',
     `outbound_order_id` BIGINT NOT NULL,
     `product_sku_id` BIGINT NOT NULL,
     `from_location_id` BIGINT NOT NULL COMMENT '拣货库位',
     `quantity` INT NOT NULL COMMENT '需拣选数量',
     `status` INT DEFAULT 1 COMMENT '状态（1：待拣选， 2：部分完成， 3：已完成）',
     `picked_quantity` INT DEFAULT 0,
+    FOREIGN KEY (`picking_wave_id`) REFERENCES `picking_wave` (`id`),
     FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`),
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`),
     FOREIGN KEY (`from_location_id`) REFERENCES `storage_location` (`id`)
 ) COMMENT='拣货任务表';
+
+-- 复核任务表
+CREATE TABLE IF NOT EXISTS `review_task` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `task_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '任务编号',
+    `outbound_order_id` BIGINT NOT NULL COMMENT '出库单ID',
+    `product_sku_id` BIGINT NOT NULL COMMENT '商品SKU ID',
+    `expected_quantity` INT NOT NULL COMMENT '预期数量',
+    `actual_quantity` INT DEFAULT 0 COMMENT '实际数量',
+    `status` INT DEFAULT 1 COMMENT '状态（1：待复核，2：复核中，3：复核完成，4：复核异常）',
+    `reviewer_id` BIGINT COMMENT '复核员ID',
+    `reviewer_name` VARCHAR(50) COMMENT '复核员姓名',
+    `review_time` TIMESTAMP NULL COMMENT '复核时间',
+    `remark` VARCHAR(500) COMMENT '备注',
+    FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`),
+    FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
+) COMMENT='复核任务表';
 
 -- 出库费用表
 CREATE TABLE IF NOT EXISTS `outbound_charge` (
