@@ -7,6 +7,10 @@ DROP TABLE IF EXISTS `quote_item`;
 
 DROP TABLE IF EXISTS `quote`;
 
+DROP TABLE IF EXISTS `packing_task`;
+
+DROP TABLE IF EXISTS `packing_material`;
+
 DROP TABLE IF EXISTS `picking_task`;
 
 DROP TABLE IF EXISTS `picking_wave`;
@@ -475,6 +479,46 @@ CREATE TABLE IF NOT EXISTS `review_task` (
     FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`),
     FOREIGN KEY (`product_sku_id`) REFERENCES `product_sku` (`id`)
 ) COMMENT='复核任务表';
+
+-- 打包任务表
+CREATE TABLE IF NOT EXISTS `packing_task` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `task_no` VARCHAR(50) NOT NULL UNIQUE COMMENT '任务编号',
+    `outbound_order_id` BIGINT NOT NULL COMMENT '出库单ID',
+    `packing_material_id` BIGINT COMMENT '包装材料ID',
+    `weight` DECIMAL(12, 4) COMMENT '重量(kg)',
+    `volume` DECIMAL(12, 6) COMMENT '体积(m³)',
+    `dimensions` VARCHAR(100) COMMENT '尺寸(长x宽x高)',
+    `status` INT DEFAULT 1 COMMENT '状态（1：待打包，2：打包中，3：已完成，4：已取消）',
+    `packer_id` BIGINT COMMENT '打包员ID',
+    `packer_name` VARCHAR(50) COMMENT '打包员姓名',
+    `packed_time` TIMESTAMP NULL COMMENT '打包完成时间',
+    `remark` VARCHAR(500) COMMENT '备注',
+    FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`)
+) COMMENT='打包任务表';
+
+-- 包装材料表
+CREATE TABLE IF NOT EXISTS `packing_material` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `material_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '材料编码',
+    `material_name` VARCHAR(100) NOT NULL COMMENT '材料名称',
+    `material_type` INT NOT NULL COMMENT '材料类型（1：纸箱，2：泡沫箱，3：塑料袋，4：木箱，5：其他）',
+    `specification` VARCHAR(100) COMMENT '规格',
+    `unit_price` DECIMAL(10, 2) COMMENT '单价',
+    `unit` VARCHAR(20) DEFAULT '个' COMMENT '单位',
+    `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
+    `remark` VARCHAR(255) COMMENT '备注'
+) COMMENT='包装材料表';
 
 -- 出库费用表
 CREATE TABLE IF NOT EXISTS `outbound_charge` (
