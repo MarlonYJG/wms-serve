@@ -53,10 +53,10 @@ public class ProductSku extends BaseEntity {
     @Column(name = "volume")
     private BigDecimal volume;
 
-    @Column(name = "is_batch_managed")
+    @Column(name = "is_batch_managed", columnDefinition = "BIT")
     private Boolean isBatchManaged = Boolean.FALSE;
 
-    @Column(name = "is_expiry_managed")
+    @Column(name = "is_expiry_managed", columnDefinition = "BIT")
     private Boolean isExpiryManaged = Boolean.FALSE;
 
     @Column(name = "shelf_life_days")
@@ -65,7 +65,7 @@ public class ProductSku extends BaseEntity {
     @Column(name = "safety_stock")
     private Integer safetyStock;
 
-    @Column(name = "is_enabled")
+    @Column(name = "is_enabled", columnDefinition = "BIT")
     private Boolean isEnabled = Boolean.TRUE;
 }
 

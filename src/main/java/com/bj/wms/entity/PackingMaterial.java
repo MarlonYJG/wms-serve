@@ -37,7 +37,7 @@ public class PackingMaterial extends BaseEntity {
     @Column(name = "unit", length = 20)
     private String unit = "个";
 
-    @Column(name = "is_enabled")
+    @Column(name = "is_enabled", columnDefinition = "BIT")
     private Boolean isEnabled = true;
 
     @Column(name = "remark", length = 255)

@@ -21,6 +21,6 @@ public interface PackingMaterialRepository extends JpaRepository<PackingMaterial
     
     List<PackingMaterial> findByIsEnabledTrue();
     
-    @Query("SELECT pm FROM PackingMaterial pm WHERE pm.materialType = :materialType AND pm.isEnabled = true")
+    @Query(value = "SELECT * FROM packing_material pm WHERE pm.material_type = :materialType AND pm.is_enabled = 1", nativeQuery = true)
     List<PackingMaterial> findEnabledByMaterialType(@Param("materialType") Integer materialType);
 }

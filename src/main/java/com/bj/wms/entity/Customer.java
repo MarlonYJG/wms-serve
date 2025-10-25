@@ -56,7 +56,7 @@ public class Customer extends BaseEntity {
     @Column(name = "credit_limit")
     private BigDecimal creditLimit;
 
-    @Column(name = "is_enabled")
+    @Column(name = "is_enabled", columnDefinition = "BIT")
     private Boolean isEnabled = Boolean.TRUE;
 }
 

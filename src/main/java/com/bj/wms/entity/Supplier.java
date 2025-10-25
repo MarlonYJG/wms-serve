@@ -46,7 +46,7 @@ public class Supplier extends BaseEntity {
     @Column(name = "rating")
     private SupplierRating rating = SupplierRating.C;
 
-    @Column(name = "is_enabled")
+    @Column(name = "is_enabled", columnDefinition = "BIT")
     private Boolean isEnabled = Boolean.TRUE;
 }
 

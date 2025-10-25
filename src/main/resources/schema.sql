@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS `quote_item`;
 
 DROP TABLE IF EXISTS `quote`;
 
+DROP TABLE IF EXISTS `charge_dict`;
+
 DROP TABLE IF EXISTS `packing_task`;
 
 DROP TABLE IF EXISTS `packing_material`;
@@ -394,6 +396,7 @@ CREATE TABLE IF NOT EXISTS `outbound_order` (
     `customer_id` BIGINT NOT NULL,
     `status` INT NOT NULL COMMENT '状态（1：待处理， 2：已分配库存， 3：拣货中， 4：已发货）',
     `customer_info` VARCHAR(500) COMMENT '客户信息',
+    `amount_total` DECIMAL(12, 2) DEFAULT 0.00 COMMENT '商品总金额',
     FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`),
     FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
 ) COMMENT='出库单表';
@@ -529,13 +532,16 @@ CREATE TABLE IF NOT EXISTS `outbound_charge` (
     `updated_time` TIMESTAMP NULL,
     `deleted` TINYINT DEFAULT 0,
     `outbound_order_id` BIGINT NOT NULL,
-    `charge_type` INT NOT NULL COMMENT '费用类型（1运费 2安装费 3保险费 99其他）',
+    `charge_type` BIGINT NOT NULL COMMENT '费用类型（关联费用字典ID）',
     `amount` DECIMAL(12, 2) NOT NULL,
     `tax_rate` DECIMAL(5, 2) NULL,
     `currency` VARCHAR(10) DEFAULT 'CNY',
     `remark` VARCHAR(255),
     FOREIGN KEY (`outbound_order_id`) REFERENCES `outbound_order` (`id`)
 ) COMMENT='出库费用表';
+
+-- 确保 charge_type 列是 BIGINT 类型
+ALTER TABLE `outbound_charge` MODIFY COLUMN `charge_type` BIGINT NOT NULL COMMENT '费用类型（关联费用字典ID）';
 
 -- 费用项字典表
 CREATE TABLE IF NOT EXISTS `charge_dict` (
@@ -548,7 +554,7 @@ CREATE TABLE IF NOT EXISTS `charge_dict` (
     `charge_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '费用编码，如 FREIGHT',
     `charge_name` VARCHAR(100) NOT NULL COMMENT '费用名称',
     `default_tax_rate` DECIMAL(5, 2) NULL,
-    `is_enabled` TINYINT DEFAULT 1 COMMENT '是否启用',
+    `is_enabled` BIT DEFAULT 1 COMMENT '是否启用',
     `remark` VARCHAR(255)
 ) COMMENT='费用项字典表';
 

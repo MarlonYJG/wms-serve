@@ -51,7 +51,7 @@ public class StorageZone extends BaseEntity {
     private BigDecimal usedCapacity;
 
     /** 是否启用 */
-    @Column(name = "is_enabled", nullable = false)
+    @Column(name = "is_enabled", nullable = false, columnDefinition = "BIT")
     private Boolean isEnabled = true;
 }
 

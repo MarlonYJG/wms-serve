@@ -43,7 +43,7 @@ public class Warehouse extends BaseEntity {
     /**
      * 仓库状态
      */
-    @Column(name = "is_enabled", nullable = false)
+    @Column(name = "is_enabled", nullable = false, columnDefinition = "BIT")
     private Boolean isEnabled = true;
 
     /**

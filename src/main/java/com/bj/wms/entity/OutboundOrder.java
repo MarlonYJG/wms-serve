@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,6 +35,12 @@ public class OutboundOrder extends BaseEntity {
 
     @Column(name = "customer_info", length = 500)
     private String customerInfo;
+
+    /**
+     * 商品总金额
+     */
+    @Column(name = "amount_total", precision = 12, scale = 2)
+    private BigDecimal amountTotal = BigDecimal.ZERO;
 
     // 关联关系
     @ManyToOne(fetch = FetchType.LAZY)
