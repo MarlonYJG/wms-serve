@@ -20,17 +20,26 @@ public interface OutboundChargeRepository extends JpaRepository<OutboundCharge, 
     /**
      * 根据出库单ID查询费用
      */
-    List<OutboundCharge> findByOutboundOrderIdAndDeletedFalse(Long outboundOrderId);
+    @Query("SELECT oc FROM OutboundCharge oc " +
+           "LEFT JOIN FETCH oc.outboundOrder " +
+           "LEFT JOIN FETCH oc.chargeDict " +
+           "WHERE oc.outboundOrderId = :outboundOrderId AND oc.deleted = 0")
+    List<OutboundCharge> findByOutboundOrderIdAndDeletedFalse(@Param("outboundOrderId") Long outboundOrderId);
 
     /**
      * 分页查询出库费用
      */
-    @Query("SELECT oc FROM OutboundCharge oc WHERE oc.deleted = 0 " +
+    @Query("SELECT oc FROM OutboundCharge oc " +
+           "LEFT JOIN FETCH oc.outboundOrder " +
+           "LEFT JOIN FETCH oc.chargeDict " +
+           "WHERE oc.deleted = 0 " +
            "AND (:outboundOrderId IS NULL OR oc.outboundOrderId = :outboundOrderId) " +
+           "AND (:outboundOrderNo IS NULL OR oc.outboundOrder.orderNo LIKE %:outboundOrderNo%) " +
            "AND (:chargeType IS NULL OR oc.chargeType = :chargeType) " +
            "AND (:startTime IS NULL OR oc.createdTime >= :startTime) " +
            "AND (:endTime IS NULL OR oc.createdTime <= :endTime)")
     Page<OutboundCharge> findCharges(@Param("outboundOrderId") Long outboundOrderId,
+                                   @Param("outboundOrderNo") String outboundOrderNo,
                                    @Param("chargeType") Long chargeType,
                                    @Param("startTime") LocalDateTime startTime,
                                    @Param("endTime") LocalDateTime endTime,
@@ -39,7 +48,12 @@ public interface OutboundChargeRepository extends JpaRepository<OutboundCharge, 
     /**
      * 根据出库单ID和费用类型查询
      */
-    List<OutboundCharge> findByOutboundOrderIdAndChargeTypeAndDeletedFalse(Long outboundOrderId, Long chargeType);
+    @Query("SELECT oc FROM OutboundCharge oc " +
+           "LEFT JOIN FETCH oc.outboundOrder " +
+           "LEFT JOIN FETCH oc.chargeDict " +
+           "WHERE oc.outboundOrderId = :outboundOrderId AND oc.chargeType = :chargeType AND oc.deleted = 0")
+    List<OutboundCharge> findByOutboundOrderIdAndChargeTypeAndDeletedFalse(@Param("outboundOrderId") Long outboundOrderId, 
+                                                                           @Param("chargeType") Long chargeType);
 
     /**
      * 根据出库单ID删除费用

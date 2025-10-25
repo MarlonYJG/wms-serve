@@ -32,12 +32,12 @@ public class OutboundChargeService {
     /**
      * 分页查询出库费用
      */
-    public Page<OutboundChargeDTO> getChargeList(Long outboundOrderId, Long chargeType, 
+    public Page<OutboundChargeDTO> getChargeList(Long outboundOrderId, String outboundOrderNo, Long chargeType, 
                                                LocalDateTime startTime, LocalDateTime endTime,
                                                Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<OutboundCharge> pageResult = outboundChargeRepository.findCharges(
-            outboundOrderId, chargeType, startTime, endTime, pageable);
+            outboundOrderId, outboundOrderNo, chargeType, startTime, endTime, pageable);
         
         return pageResult.map(OutboundChargeMapper.INSTANCE::toDTO);
     }

@@ -26,7 +26,9 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
     /**
      * 分页查询结算单
      */
-    @Query("SELECT s FROM Settlement s WHERE s.deleted = 0 " +
+    @Query("SELECT s FROM Settlement s " +
+           "LEFT JOIN FETCH s.customer " +
+           "WHERE s.deleted = 0 " +
            "AND (:settlementNo IS NULL OR s.settlementNo LIKE %:settlementNo%) " +
            "AND (:customerId IS NULL OR s.customerId = :customerId) " +
            "AND (:status IS NULL OR s.status = :status) " +

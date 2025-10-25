@@ -3,6 +3,7 @@ package com.bj.wms.controller;
 import com.bj.wms.dto.OutboundChargeCreateRequest;
 import com.bj.wms.dto.OutboundChargeDTO;
 import com.bj.wms.service.OutboundChargeService;
+import com.bj.wms.util.PageResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,9 @@ public class OutboundChargeController {
      * 分页查询出库费用
      */
     @GetMapping
-    public ResponseEntity<Page<OutboundChargeDTO>> getChargeList(
+    public ResponseEntity<PageResult<OutboundChargeDTO>> getChargeList(
             @RequestParam(required = false) Long outboundOrderId,
+            @RequestParam(required = false) String outboundOrderNo,
             @RequestParam(required = false) Long chargeType,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
@@ -39,8 +41,13 @@ public class OutboundChargeController {
         LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime) : null;
         LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime) : null;
         
-        Page<OutboundChargeDTO> result = outboundChargeService.getChargeList(
-            outboundOrderId, chargeType, start, end, page, size);
+        Page<OutboundChargeDTO> pageResult = outboundChargeService.getChargeList(
+            outboundOrderId, outboundOrderNo, chargeType, start, end, page, size);
+        
+        PageResult<OutboundChargeDTO> result = new PageResult<>(
+            pageResult.getContent(), 
+            pageResult.getTotalElements()
+        );
         return ResponseEntity.ok(result);
     }
 

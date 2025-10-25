@@ -17,7 +17,11 @@ public interface SettlementItemRepository extends JpaRepository<SettlementItem, 
     /**
      * 根据结算单ID查询明细
      */
-    List<SettlementItem> findBySettlementIdAndDeletedFalse(Long settlementId);
+    @Query("SELECT si FROM SettlementItem si " +
+           "LEFT JOIN FETCH si.settlement " +
+           "LEFT JOIN FETCH si.outboundOrder " +
+           "WHERE si.settlementId = :settlementId AND si.deleted = 0")
+    List<SettlementItem> findBySettlementIdAndDeletedFalse(@Param("settlementId") Long settlementId);
 
     /**
      * 根据出库单ID查询明细
