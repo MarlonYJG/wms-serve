@@ -174,6 +174,10 @@ CREATE TABLE IF NOT EXISTS `product_sku` (
     `shelf_life_days` INT NULL COMMENT '保质期天数',
     `safety_stock` INT NULL COMMENT '安全库存',
     `is_enabled` BIT(1) DEFAULT b'1' COMMENT '是否启用',
+    `purchase_price` DECIMAL(12, 2) NULL COMMENT '采购价格',
+    `cost_price` DECIMAL(12, 2) NULL COMMENT '成本价格（包含采购价和入库费用分摊）',
+    `sale_price` DECIMAL(12, 2) NULL COMMENT '销售价格',
+    `retail_price` DECIMAL(12, 2) NULL COMMENT '建议零售价',
     FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`)
 ) COMMENT='商品SKU表';
 
@@ -542,6 +546,23 @@ CREATE TABLE IF NOT EXISTS `outbound_charge` (
 
 -- 确保 charge_type 列是 BIGINT 类型
 ALTER TABLE `outbound_charge` MODIFY COLUMN `charge_type` BIGINT NOT NULL COMMENT '费用类型（关联费用字典ID）';
+
+-- 入库费用表
+CREATE TABLE IF NOT EXISTS `inbound_charge` (
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `created_by` VARCHAR(50),
+    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` VARCHAR(50),
+    `updated_time` TIMESTAMP NULL,
+    `deleted` TINYINT DEFAULT 0,
+    `inbound_order_id` BIGINT NOT NULL,
+    `charge_type` BIGINT NOT NULL COMMENT '费用类型（关联费用字典ID）',
+    `amount` DECIMAL(12, 2) NOT NULL,
+    `tax_rate` DECIMAL(5, 2) NULL,
+    `currency` VARCHAR(10) DEFAULT 'CNY',
+    `remark` VARCHAR(255),
+    FOREIGN KEY (`inbound_order_id`) REFERENCES `inbound_order` (`id`)
+) COMMENT='入库费用表';
 
 -- 费用项字典表
 CREATE TABLE IF NOT EXISTS `charge_dict` (

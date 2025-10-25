@@ -77,10 +77,10 @@ INSERT INTO storage_location (zone_id, location_code, location_name, location_ty
 (9, 'PL-SHIP-01','平凉发货暂存01', 2, 15.00, 0.00, 1, CURRENT_TIMESTAMP),
 (9, 'PL-SHIP-02','平凉发货暂存02', 2, 15.00, 0.00, 1, CURRENT_TIMESTAMP);
 
-INSERT INTO product_sku (sku_code, sku_name, specification, brand, category_id, supplier_id, barcode, weight, volume, is_batch_managed, is_expiry_managed, shelf_life_days, safety_stock, is_enabled, created_time) VALUES
-('SKU1001', '智能手环', '黑色 标准款', '智品', NULL, 1, '690000100001', 0.0500, 0.0008, b'0', b'0', NULL, 100, b'1', CURRENT_TIMESTAMP),
-('SKU1002', '蓝牙耳机', '降噪版',     '声浪', NULL, 1, '690000100002', 0.0300, 0.0006, b'0', b'0', NULL, 100, b'1', CURRENT_TIMESTAMP),
-('SKU1003', '有机大米', '5kg',        '稻香', NULL, 2, '690000100003', 5.0000, 0.0080, b'1', b'1', 365, 50, b'1', CURRENT_TIMESTAMP);
+INSERT INTO product_sku (sku_code, sku_name, specification, brand, category_id, supplier_id, barcode, weight, volume, is_batch_managed, is_expiry_managed, shelf_life_days, safety_stock, is_enabled, purchase_price, cost_price, sale_price, retail_price, created_time) VALUES
+('SKU1001', '智能手环', '黑色 标准款', '智品', NULL, 1, '690000100001', 0.0500, 0.0008, b'0', b'0', NULL, 100, b'1', 89.00, 95.00, 129.00, 149.00, CURRENT_TIMESTAMP),
+('SKU1002', '蓝牙耳机', '降噪版',     '声浪', NULL, 1, '690000100002', 0.0300, 0.0006, b'0', b'0', NULL, 100, b'1', 199.00, 215.00, 299.00, 349.00, CURRENT_TIMESTAMP),
+('SKU1003', '有机大米', '5kg',        '稻香', NULL, 2, '690000100003', 5.0000, 0.0080, b'1', b'1', 365, 50, b'1', 25.00, 28.00, 35.00, 39.00, CURRENT_TIMESTAMP);
 
 -- 2) 入库单数据
 INSERT INTO inbound_order (order_no, warehouse_id, supplier_id, status, total_expected_quantity, total_received_quantity, created_time) VALUES
@@ -151,3 +151,15 @@ INSERT INTO outbound_charge (outbound_order_id, charge_type, amount, tax_rate, c
 (3, 2, 50.00, NULL, 'CNY', '安装费-平凉', CURRENT_TIMESTAMP),
 (4, 1, 25.00, NULL, 'CNY', '运费-平凉京东', CURRENT_TIMESTAMP),
 (4, 3, 5.00, NULL, 'CNY', '保价费-平凉', CURRENT_TIMESTAMP);
+
+-- 7) 入库费用（使用费用字典ID）
+INSERT INTO inbound_charge (inbound_order_id, charge_type, amount, tax_rate, currency, remark, created_time) VALUES
+-- 北京仓库入库费用
+(1, 1, 15.00, NULL, 'CNY', '运费-北京入库', CURRENT_TIMESTAMP),
+(1, 2, 20.00, NULL, 'CNY', '装卸费-北京', CURRENT_TIMESTAMP),
+(2, 1, 12.00, NULL, 'CNY', '运费-北京入库2', CURRENT_TIMESTAMP),
+-- 甘肃平凉仓库入库费用
+(3, 1, 18.00, NULL, 'CNY', '运费-平凉入库', CURRENT_TIMESTAMP),
+(3, 2, 25.00, NULL, 'CNY', '装卸费-平凉', CURRENT_TIMESTAMP),
+(4, 1, 16.00, NULL, 'CNY', '运费-平凉入库2', CURRENT_TIMESTAMP),
+(4, 2, 22.00, NULL, 'CNY', '装卸费-平凉2', CURRENT_TIMESTAMP);

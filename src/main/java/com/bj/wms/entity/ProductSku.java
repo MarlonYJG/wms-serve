@@ -67,6 +67,30 @@ public class ProductSku extends BaseEntity {
 
     @Column(name = "is_enabled", columnDefinition = "BIT")
     private Boolean isEnabled = Boolean.TRUE;
+
+    /**
+     * 采购价格
+     */
+    @Column(name = "purchase_price", precision = 12, scale = 2)
+    private BigDecimal purchasePrice;
+
+    /**
+     * 成本价格（包含采购价和入库费用分摊）
+     */
+    @Column(name = "cost_price", precision = 12, scale = 2)
+    private BigDecimal costPrice;
+
+    /**
+     * 销售价格
+     */
+    @Column(name = "sale_price", precision = 12, scale = 2)
+    private BigDecimal salePrice;
+
+    /**
+     * 建议零售价
+     */
+    @Column(name = "retail_price", precision = 12, scale = 2)
+    private BigDecimal retailPrice;
 }
 
 
