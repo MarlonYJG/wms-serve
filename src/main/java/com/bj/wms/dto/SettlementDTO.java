@@ -11,7 +11,6 @@ import java.util.List;
  */
 @Data
 public class SettlementDTO {
-
     private Long id;
     private String settlementNo;
     private Long customerId;
@@ -30,6 +29,8 @@ public class SettlementDTO {
     private String updatedBy;
     private LocalDateTime updatedTime;
     
-    // 结算明细列表
+    /**
+     * 结算明细
+     */
     private List<SettlementItemDTO> items;
 }

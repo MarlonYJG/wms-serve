@@ -13,30 +13,15 @@ spring:
   application:
     name: wms-backend
   
-  # 数据源配置 - 默认开发环境配置
-  datasource:
-    # 开发环境使用H2内存数据库（便于快速开发）
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=VALUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  # 数据源配置 - 由具体环境配置文件定义
+  # 开发环境：application-dev.yml (H2)
+  # 生产环境：application-prod.yml (MySQL)
   
-  # JPA/Hibernate配置
-  jpa:
-    hibernate:
-      ddl-auto: update  # 自动创建/更新表结构
-    show-sql: true      # 显示SQL语句
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect  # 数据库方言
-        format_sql: true  # 格式化SQL输出
-    open-in-view: false  # 避免懒加载问题
+  # JPA/Hibernate配置 - 由具体环境配置文件定义
+  # 开发环境：application-dev.yml
+  # 生产环境：application-prod.yml
   
-  # H2数据库控制台配置（仅开发环境）
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  # H2数据库控制台配置 - 由开发环境配置文件定义
   
   # 安全配置：删除默认用户，使用自定义 SecurityConfig 放行策略
 

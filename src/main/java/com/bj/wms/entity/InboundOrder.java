@@ -40,6 +40,14 @@ public class InboundOrder extends BaseEntity {
     private Integer totalReceivedQuantity = 0;
 
     // 关联关系
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", insertable = false, updatable = false)
+    private Warehouse warehouse;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", insertable = false, updatable = false)
+    private Supplier supplier;
+
     @OneToMany(mappedBy = "inboundOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InboundOrderItem> orderItems;
 }

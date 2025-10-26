@@ -28,4 +28,12 @@ public interface OutboundOrderRepository extends JpaRepository<OutboundOrder, Lo
     Page<OutboundOrder> findAll(Specification<OutboundOrder> spec, Pageable pageable);
     
     List<OutboundOrder> findByStatus(Integer status);
+    
+    /**
+     * 根据客户ID和状态查询出库单
+     */
+    @Query("SELECT o FROM OutboundOrder o WHERE o.customerId = :customerId AND o.status = :status " +
+           "AND o.id NOT IN (SELECT si.outboundOrderId FROM SettlementItem si WHERE si.deleted = 0)")
+    List<OutboundOrder> findByCustomerIdAndStatusAndSettledFalse(@Param("customerId") Long customerId, 
+                                                                @Param("status") Integer status);
 }

@@ -14,8 +14,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 public class InboundOrderItem extends BaseEntity {
 
-    @NotNull
-    @Column(name = "inbound_order_id", nullable = false)
+    @Column(name = "inbound_order_id", nullable = false, insertable = false, updatable = false)
     private Long inboundOrderId;
 
     @NotNull
@@ -43,7 +42,7 @@ public class InboundOrderItem extends BaseEntity {
 
     // 关联关系
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inbound_order_id", insertable = false, updatable = false)
+    @JoinColumn(name = "inbound_order_id")
     private InboundOrder inboundOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)

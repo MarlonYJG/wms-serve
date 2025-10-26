@@ -9,7 +9,6 @@ import java.math.BigDecimal;
  */
 @Data
 public class SettlementItemDTO {
-
     private Long id;
     private Long settlementId;
     private Long outboundOrderId;

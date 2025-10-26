@@ -20,7 +20,8 @@ public class SupplierService {
     private final SupplierRepository supplierRepository;
 
     public Page<Supplier> page(Integer page, Integer size, String keyword, String supplierName, String supplierCode, Boolean isEnabled) {
-        int pageIndex = page == null || page < 0 ? 0 : page;
+        // 前端页码从1开始，JPA页码从0开始，需要转换
+        int pageIndex = page == null ? 0 : Math.max(0, page - 1);
         int pageSize = size == null || size < 1 ? 10 : size;
         Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -45,6 +46,8 @@ public class SupplierService {
             if (isEnabled != null) {
                 predicate.getExpressions().add(cb.equal(root.get("isEnabled"), isEnabled));
             }
+            // 只查询未删除的记录
+            predicate.getExpressions().add(cb.equal(root.get("deleted"), 0));
             return predicate;
         };
 

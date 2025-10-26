@@ -13,6 +13,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Jpa
     List<Inventory> findByWarehouseIdAndProductSkuIdAndLockedQuantityGreaterThan(Long warehouseId, Long productSkuId, int lockedQuantity);
     
     List<Inventory> findByWarehouseIdAndLocationIdAndProductSkuId(Long warehouseId, Long locationId, Long productSkuId);
+    
+    List<Inventory> findByProductSkuIdAndQuantityGreaterThan(Long productSkuId, int quantity);
 }
 
 

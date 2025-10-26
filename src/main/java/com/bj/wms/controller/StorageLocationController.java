@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/storage-locations")
+@RequestMapping("/api/storage-locations")
 @RequiredArgsConstructor
 public class StorageLocationController {
 
@@ -66,6 +66,18 @@ public class StorageLocationController {
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         storageLocationService.delete(id);
         return ResponseUtil.successMsg("删除成功");
+    }
+
+    /**
+     * 根据仓库ID获取可用库位
+     */
+    @GetMapping("/warehouse/{warehouseId}/available")
+    public ResponseEntity<List<StorageLocationDTO>> getAvailableLocationsByWarehouse(@PathVariable Long warehouseId) {
+        List<StorageLocation> locations = storageLocationService.getAvailableLocationsByWarehouse(warehouseId);
+        List<StorageLocationDTO> result = locations.stream()
+                .map(StorageLocationMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
     }
 }
 

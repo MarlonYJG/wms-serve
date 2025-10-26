@@ -10,8 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import java.util.ArrayList;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +35,7 @@ public class SettlementService {
     private final SettlementRepository settlementRepository;
     private final SettlementItemRepository settlementItemRepository;
     private final OutboundOrderRepository outboundOrderRepository;
+    private final OutboundOrderItemRepository outboundOrderItemRepository;
     private final OutboundChargeRepository outboundChargeRepository;
     private final CustomerRepository customerRepository;
 
@@ -47,7 +54,7 @@ public class SettlementService {
         );
 
         List<SettlementDTO> dtoList = SettlementMapper.INSTANCE.toDTOList(page.getContent());
-        return new PageResult<>(dtoList, page.getTotalElements());
+        return new PageResult<>(dtoList, request.getPage(), request.getSize(), page.getTotalElements());
     }
 
     /**
@@ -123,7 +130,7 @@ public class SettlementService {
                 .orElseThrow(() -> new RuntimeException("出库单不存在: " + outboundOrderId));
 
             // 计算出库单金额
-            BigDecimal amountGoods = outboundOrder.getAmountTotal() != null ? outboundOrder.getAmountTotal() : BigDecimal.ZERO;
+            BigDecimal amountGoods = calculateOutboundOrderGoodsAmount(outboundOrderId);
             BigDecimal amountCharges = BigDecimal.valueOf(outboundChargeRepository.sumAmountByOutboundOrderId(outboundOrderId));
             BigDecimal amountTotal = amountGoods.add(amountCharges);
 
@@ -268,6 +275,128 @@ public class SettlementService {
             settlement.setUpdatedTime(LocalDateTime.now());
             settlementRepository.save(settlement);
         }
+    }
+
+    /**
+     * 获取可结算的出库单列表
+     */
+    public List<OutboundOrderDTO> getSettlableOutboundOrders(Long customerId) {
+        // 查询已发货但未结算的出库单
+        List<OutboundOrder> orders = outboundOrderRepository.findByCustomerIdAndStatusAndSettledFalse(customerId, 4);
+        return orders.stream()
+            .map(order -> {
+                OutboundOrderDTO dto = new OutboundOrderDTO();
+                dto.setId(order.getId());
+                dto.setOrderNo(order.getOrderNo());
+                dto.setCustomerId(order.getCustomerId());
+                dto.setStatus(order.getStatus());
+                dto.setCreatedTime(order.getCreatedTime());
+                
+                // 计算商品金额（通过出库单明细计算）
+                BigDecimal goodsAmount = calculateOutboundOrderGoodsAmount(order.getId());
+                dto.setAmountTotal(goodsAmount);
+                
+                // 计算费用金额
+                BigDecimal chargeAmount = BigDecimal.valueOf(outboundChargeRepository.sumAmountByOutboundOrderId(order.getId()));
+                dto.setChargeAmount(chargeAmount);
+                
+                // 计算总金额（商品金额 + 费用金额）
+                BigDecimal totalAmount = goodsAmount.add(chargeAmount);
+                dto.setTotalAmount(totalAmount);
+                
+                return dto;
+            })
+            .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * 获取所有可结算的出库单列表（支持分页和搜索）
+     */
+    public PageResult<OutboundOrderDTO> getAllSettlableOutboundOrders(OutboundOrderQueryRequest request) {
+        // 构建查询条件
+        Specification<OutboundOrder> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // 只查询已发货的出库单
+            predicates.add(cb.equal(root.get("status"), 4));
+            
+            // 客户筛选
+            if (request.getCustomerId() != null) {
+                predicates.add(cb.equal(root.get("customerId"), request.getCustomerId()));
+            }
+            
+            // 出库单号筛选
+            if (request.getOrderNo() != null && !request.getOrderNo().trim().isEmpty()) {
+                predicates.add(cb.like(root.get("orderNo"), "%" + request.getOrderNo() + "%"));
+            }
+            
+            // 时间范围筛选
+            if (request.getStartTime() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdTime"), request.getStartTime()));
+            }
+            if (request.getEndTime() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdTime"), request.getEndTime()));
+            }
+            
+            // 排除已结算的出库单
+            Subquery<Long> subquery = query.subquery(Long.class);
+            Root<SettlementItem> subRoot = subquery.from(SettlementItem.class);
+            subquery.select(subRoot.get("outboundOrderId"))
+                   .where(cb.equal(subRoot.get("deleted"), 0));
+            predicates.add(cb.not(root.get("id").in(subquery)));
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize());
+        Page<OutboundOrder> page = outboundOrderRepository.findAll(spec, pageable);
+        
+        List<OutboundOrderDTO> dtoList = page.getContent().stream()
+            .map(order -> {
+                OutboundOrderDTO dto = new OutboundOrderDTO();
+                dto.setId(order.getId());
+                dto.setOrderNo(order.getOrderNo());
+                dto.setCustomerId(order.getCustomerId());
+                dto.setStatus(order.getStatus());
+                dto.setCreatedTime(order.getCreatedTime());
+                
+                // 计算商品金额（通过出库单明细计算）
+                BigDecimal goodsAmount = calculateOutboundOrderGoodsAmount(order.getId());
+                dto.setAmountTotal(goodsAmount);
+                
+                // 计算费用金额
+                BigDecimal chargeAmount = BigDecimal.valueOf(outboundChargeRepository.sumAmountByOutboundOrderId(order.getId()));
+                dto.setChargeAmount(chargeAmount);
+                
+                // 计算总金额（商品金额 + 费用金额）
+                BigDecimal totalAmount = goodsAmount.add(chargeAmount);
+                dto.setTotalAmount(totalAmount);
+                
+                return dto;
+            })
+            .collect(java.util.stream.Collectors.toList());
+        
+        return new PageResult<>(dtoList, request.getPage(), request.getSize(), page.getTotalElements());
+    }
+
+    /**
+     * 计算出库单商品金额
+     */
+    private BigDecimal calculateOutboundOrderGoodsAmount(Long outboundOrderId) {
+        // 查询出库单明细
+        List<OutboundOrderItem> items = outboundOrderItemRepository.findByOutboundOrderIdAndDeletedFalse(outboundOrderId);
+        
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (OutboundOrderItem item : items) {
+            if (item.getProductSku() != null && item.getQuantity() != null) {
+                // 商品金额 = 数量 × 销售价格
+                BigDecimal itemAmount = item.getProductSku().getSalePrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+                totalAmount = totalAmount.add(itemAmount);
+            }
+        }
+        
+        return totalAmount;
     }
 
     /**

@@ -291,7 +291,7 @@ CREATE TABLE IF NOT EXISTS `putaway_task` (
     `task_no` VARCHAR(50) NOT NULL UNIQUE,
     `inbound_order_item_id` BIGINT NOT NULL COMMENT '关联的入库明细',
     `from_location_id` BIGINT COMMENT '来源库位（通常是收货暂存区）',
-    `to_location_id` BIGINT NOT NULL COMMENT '目标上架库位',
+    `to_location_id` BIGINT COMMENT '目标上架库位',
     `quantity` INT NOT NULL COMMENT '上架数量',
     `status` INT DEFAULT 1 COMMENT '状态（1：待执行， 2：已完成）',
     `operator` INT COMMENT '操作员',
@@ -300,6 +300,9 @@ CREATE TABLE IF NOT EXISTS `putaway_task` (
     FOREIGN KEY (`from_location_id`) REFERENCES `storage_location` (`id`),
     FOREIGN KEY (`to_location_id`) REFERENCES `storage_location` (`id`)
 ) COMMENT='上架任务表';
+
+-- 修改 putaway_task 表，允许 to_location_id 为 NULL
+ALTER TABLE `putaway_task` MODIFY COLUMN `to_location_id` BIGINT COMMENT '目标上架库位';
 
 -- 3. 库存核心表
 

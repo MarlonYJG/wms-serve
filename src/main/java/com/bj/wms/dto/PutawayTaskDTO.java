@@ -17,19 +17,25 @@ public class PutawayTaskDTO {
     private Long inboundOrderItemId;
 
     private Long fromLocationId;
+    private String fromLocationCode;
 
-    @NotNull
     private Long toLocationId;
+    private String toLocationCode;
 
     @NotNull
     private Integer quantity;
 
     private Integer status;
+    private String statusName;
 
     private Integer operator;
 
-    private Long createdTime;
+    // 关联信息
+    private Long productSkuId;
+    private String skuCode;
+    private String productName;
 
+    private Long createdTime;
     private Long updatedTime;
 }
 

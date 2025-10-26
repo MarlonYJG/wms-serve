@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -100,6 +101,17 @@ public class StorageLocationService {
                 .orElseThrow(() -> new IllegalArgumentException("库位不存在"));
         exist.setStatus(status == null ? LocationStatus.AVAILABLE : status);
         return storageLocationRepository.save(exist);
+    }
+
+    /**
+     * 根据仓库ID获取可用库位
+     */
+    public List<StorageLocation> getAvailableLocationsByWarehouse(Long warehouseId) {
+        return storageLocationRepository.findByWarehouseId(warehouseId).stream()
+                .filter(location -> location.getDeleted() != 1)
+                .filter(location -> location.getStatus() == LocationStatus.AVAILABLE)
+                .filter(location -> location.getCurrentVolume() == null || location.getCurrentVolume().compareTo(location.getCapacity()) < 0)
+                .toList();
     }
 }
 

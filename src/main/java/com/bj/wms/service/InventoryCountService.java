@@ -40,7 +40,7 @@ public class InventoryCountService {
         };
         Page<InventoryCount> pageData = countRepository.findAll(spec, pageable);
         List<InventoryCountDTO> content = pageData.getContent().stream().map(e -> toDetail(e.getId())).toList();
-        return new PageResult<>(content, pageData.getTotalElements());
+        return new PageResult<>(content, page, size, pageData.getTotalElements());
     }
 
     public InventoryCountDTO toDetail(Long id) {

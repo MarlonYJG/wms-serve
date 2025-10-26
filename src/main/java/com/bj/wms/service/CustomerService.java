@@ -1,105 +1,90 @@
 package com.bj.wms.service;
 
+import com.bj.wms.dto.CustomerDTO;
 import com.bj.wms.entity.Customer;
+import com.bj.wms.mapper.CustomerMapper;
 import com.bj.wms.repository.CustomerRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * 客户服务
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    public Page<Customer> page(Integer page, Integer size, String keyword, String customerName, String customerCode, Boolean isEnabled) {
-        int pageIndex = page == null || page < 0 ? 0 : page;
-        int pageSize = size == null || size < 1 ? 10 : size;
-        Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-
+    /**
+     * 分页查询客户列表
+     */
+    public Page<CustomerDTO> getCustomerList(Integer page, Integer size, String keyword, Boolean isEnabled) {
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), size);
+        
         Specification<Customer> spec = (root, query, cb) -> {
-            var predicate = cb.conjunction();
-            if (keyword != null && !keyword.isBlank()) {
-                String like = "%" + keyword.trim() + "%";
-                predicate.getExpressions().add(
-                    cb.or(
-                        cb.like(root.get("customerName"), like),
-                        cb.like(root.get("customerCode"), like),
-                        cb.like(root.get("contactPerson"), like)
-                    )
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // 只查询未删除的客户
+            predicates.add(cb.equal(root.get("deleted"), 0));
+            
+            // 关键词搜索
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String searchKeyword = "%" + keyword.trim() + "%";
+                Predicate keywordPredicate = cb.or(
+                    cb.like(root.get("customerCode"), searchKeyword),
+                    cb.like(root.get("customerName"), searchKeyword),
+                    cb.like(root.get("contactPerson"), searchKeyword)
                 );
+                predicates.add(keywordPredicate);
             }
-            if (customerName != null && !customerName.isBlank()) {
-                predicate.getExpressions().add(cb.like(root.get("customerName"), "%" + customerName.trim() + "%"));
-            }
-            if (customerCode != null && !customerCode.isBlank()) {
-                predicate.getExpressions().add(cb.like(root.get("customerCode"), "%" + customerCode.trim() + "%"));
-            }
+            
+            // 启用状态筛选
             if (isEnabled != null) {
-                predicate.getExpressions().add(cb.equal(root.get("isEnabled"), isEnabled));
+                predicates.add(cb.equal(root.get("isEnabled"), isEnabled));
             }
-            return predicate;
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
-
-        return customerRepository.findAll(spec, pageable);
+        
+        Page<Customer> customerPage = customerRepository.findAll(spec, pageable);
+        return customerPage.map(CustomerMapper.INSTANCE::toDTO);
     }
 
-    public Optional<Customer> findById(Long id) {
-        return customerRepository.findById(id);
+    /**
+     * 获取所有启用的客户
+     */
+    public List<CustomerDTO> getEnabledCustomers() {
+        List<Customer> customers = customerRepository.findEnabledCustomers();
+        return CustomerMapper.INSTANCE.toDTOList(customers);
     }
 
-    @Transactional
-    public Customer create(Customer toCreate) {
-        if (customerRepository.existsByCustomerCode(toCreate.getCustomerCode())) {
-            throw new IllegalArgumentException("客户编码已存在");
-        }
-        return customerRepository.save(toCreate);
+    /**
+     * 根据ID获取客户详情
+     */
+    public CustomerDTO getCustomerById(Long id) {
+        Customer customer = customerRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("客户不存在"));
+        return CustomerMapper.INSTANCE.toDTO(customer);
     }
 
-    @Transactional
-    public Customer update(Long id, Customer updates) {
-        Customer existing = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("客户不存在"));
-
-        if (updates.getCustomerCode() != null && !updates.getCustomerCode().equals(existing.getCustomerCode())) {
-            if (customerRepository.existsByCustomerCode(updates.getCustomerCode())) {
-                throw new IllegalArgumentException("客户编码已存在");
-            }
-            existing.setCustomerCode(updates.getCustomerCode());
-        }
-
-        if (updates.getCustomerName() != null) existing.setCustomerName(updates.getCustomerName());
-        if (updates.getCustomerType() != null) existing.setCustomerType(updates.getCustomerType());
-        if (updates.getContactPerson() != null) existing.setContactPerson(updates.getContactPerson());
-        if (updates.getContactPhone() != null) existing.setContactPhone(updates.getContactPhone());
-        if (updates.getEmail() != null) existing.setEmail(updates.getEmail());
-        if (updates.getAddress() != null) existing.setAddress(updates.getAddress());
-        if (updates.getCreditRating() != null) existing.setCreditRating(updates.getCreditRating());
-        if (updates.getCreditLimit() != null) existing.setCreditLimit(updates.getCreditLimit());
-        if (updates.getIsEnabled() != null) existing.setIsEnabled(updates.getIsEnabled());
-
-        return customerRepository.save(existing);
-    }
-
-    @Transactional
-    public Customer updateStatus(Long id, Boolean isEnabled) {
-        Customer existing = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("客户不存在"));
-        existing.setIsEnabled(isEnabled);
-        return customerRepository.save(existing);
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        customerRepository.deleteById(id);
+    /**
+     * 根据客户编码获取客户
+     */
+    public CustomerDTO getCustomerByCode(String customerCode) {
+        Customer customer = customerRepository.findByCustomerCode(customerCode)
+            .orElseThrow(() -> new RuntimeException("客户不存在"));
+        return CustomerMapper.INSTANCE.toDTO(customer);
     }
 }
-
-

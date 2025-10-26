@@ -88,7 +88,9 @@ INSERT INTO inbound_order (order_no, warehouse_id, supplier_id, status, total_ex
 ('IN002', 1, 2, 2, 100, 60, CURRENT_TIMESTAMP),
 -- 甘肃平凉仓库入库单
 ('IN003', 2, 1, 3, 200, 200, CURRENT_TIMESTAMP),
-('IN004', 2, 2, 2, 150, 100, CURRENT_TIMESTAMP);
+('IN004', 2, 2, 2, 150, 100, CURRENT_TIMESTAMP),
+-- 待收货入库单（用于测试确认收货功能）
+('IN005', 1, 1, 1, 80, 0, CURRENT_TIMESTAMP);
 
 INSERT INTO inbound_order_item (inbound_order_id, product_sku_id, expected_quantity, received_quantity, created_time) VALUES
 (1, 1, 60, 60, CURRENT_TIMESTAMP),
@@ -102,7 +104,10 @@ INSERT INTO inbound_order_item (inbound_order_id, product_sku_id, expected_quant
 (3, 3, 50, 50, CURRENT_TIMESTAMP),
 (4, 1, 60, 40, CURRENT_TIMESTAMP),
 (4, 2, 60, 40, CURRENT_TIMESTAMP),
-(4, 3, 30, 20, CURRENT_TIMESTAMP);
+(4, 3, 30, 20, CURRENT_TIMESTAMP),
+-- 待收货入库单明细
+(5, 1, 40, 0, CURRENT_TIMESTAMP),
+(5, 2, 40, 0, CURRENT_TIMESTAMP);
 
 -- 3) 库存数据
 INSERT INTO inventory (warehouse_id, location_id, product_sku_id, batch_no, production_date, expiry_date, quantity, locked_quantity, created_time) VALUES
@@ -163,3 +168,13 @@ INSERT INTO inbound_charge (inbound_order_id, charge_type, amount, tax_rate, cur
 (3, 2, 25.00, NULL, 'CNY', '装卸费-平凉', CURRENT_TIMESTAMP),
 (4, 1, 16.00, NULL, 'CNY', '运费-平凉入库2', CURRENT_TIMESTAMP),
 (4, 2, 22.00, NULL, 'CNY', '装卸费-平凉2', CURRENT_TIMESTAMP);
+
+-- 8) 结算单测试数据
+INSERT INTO settlement (settlement_no, customer_id, period_start, period_end, status, currency, amount_goods, amount_charges, amount_total, remark, created_time) VALUES
+('ST20241026001', 1, '2024-10-01 00:00:00', '2024-10-31 23:59:59', 1, 'CNY', 3682.00, 28.00, 3710.00, '测试结算单1', CURRENT_TIMESTAMP),
+('ST20241026002', 2, '2024-10-01 00:00:00', '2024-10-31 23:59:59', 2, 'CNY', 420.00, 21.00, 441.00, '测试结算单2', CURRENT_TIMESTAMP);
+
+-- 9) 结算明细测试数据
+INSERT INTO settlement_item (settlement_id, outbound_order_id, amount_goods, amount_charges, amount_total, remark, created_time) VALUES
+(1, 1, 3682.00, 28.00, 3710.00, '出库单OUT001结算明细', CURRENT_TIMESTAMP),
+(2, 2, 420.00, 21.00, 441.00, '出库单OUT002结算明细', CURRENT_TIMESTAMP);

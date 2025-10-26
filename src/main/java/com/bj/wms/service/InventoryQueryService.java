@@ -60,7 +60,7 @@ public class InventoryQueryService {
             return InventoryTransactionMapper.toDTO(e, warehouseName, locationCode, code, name);
         }).toList();
 
-        return new PageResult<>(content, pageData.getTotalElements());
+        return new PageResult<>(content, page, size, pageData.getTotalElements());
     }
 }
 

@@ -106,4 +106,22 @@ public class SettlementController {
         settlementService.voidSettlement(id);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 获取可结算的出库单列表
+     */
+    @GetMapping("/settlable-orders")
+    public ResponseEntity<List<OutboundOrderDTO>> getSettlableOutboundOrders(@RequestParam Long customerId) {
+        List<OutboundOrderDTO> result = settlementService.getSettlableOutboundOrders(customerId);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 获取所有可结算的出库单列表（支持分页和搜索）
+     */
+    @GetMapping("/all-settlable-orders")
+    public ResponseEntity<PageResult<OutboundOrderDTO>> getAllSettlableOutboundOrders(OutboundOrderQueryRequest request) {
+        PageResult<OutboundOrderDTO> result = settlementService.getAllSettlableOutboundOrders(request);
+        return ResponseEntity.ok(result);
+    }
 }

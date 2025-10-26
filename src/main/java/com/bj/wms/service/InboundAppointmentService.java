@@ -72,7 +72,7 @@ public class InboundAppointmentService {
             .map(InboundAppointmentMapper::toDTO)
             .toList();
 
-        return new PageResult<>(dtoList, page.getTotalElements());
+        return new PageResult<>(dtoList, request.getPage(), request.getSize(), page.getTotalElements());
     }
 
     /**

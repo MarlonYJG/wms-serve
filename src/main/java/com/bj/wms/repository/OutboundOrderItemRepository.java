@@ -15,5 +15,10 @@ public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrder
     @Query("SELECT oi FROM OutboundOrderItem oi WHERE oi.outboundOrderId = :outboundOrderId AND oi.productSkuId = :productSkuId")
     Optional<OutboundOrderItem> findByOutboundOrderIdAndProductSkuId(@Param("outboundOrderId") Long outboundOrderId, @Param("productSkuId") Long productSkuId);
     
+    @Query("SELECT oi FROM OutboundOrderItem oi " +
+           "LEFT JOIN FETCH oi.productSku " +
+           "WHERE oi.outboundOrderId = :outboundOrderId AND oi.deleted = 0")
+    List<OutboundOrderItem> findByOutboundOrderIdAndDeletedFalse(@Param("outboundOrderId") Long outboundOrderId);
+    
     void deleteByOutboundOrderId(Long outboundOrderId);
 }

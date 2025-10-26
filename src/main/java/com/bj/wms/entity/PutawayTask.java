@@ -25,8 +25,7 @@ public class PutawayTask extends BaseEntity {
     @Column(name = "from_location_id")
     private Long fromLocationId;
 
-    @NotNull
-    @Column(name = "to_location_id", nullable = false)
+    @Column(name = "to_location_id")
     private Long toLocationId;
 
     @NotNull
@@ -34,7 +33,7 @@ public class PutawayTask extends BaseEntity {
     private Integer quantity;
 
     /**
-     * 1：待执行，2：已完成
+     * 1：待执行，2：进行中，3：已完成
      */
     @Column(name = "status")
     private Integer status = 1;

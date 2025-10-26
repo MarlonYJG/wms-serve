@@ -37,9 +37,7 @@ public class PutawayTaskController {
 
     @GetMapping("/by-inbound-order/{inboundOrderId}")
     public ResponseEntity<List<PutawayTaskDTO>> listByInboundOrder(@PathVariable Long inboundOrderId) {
-        List<PutawayTaskDTO> list = putawayTaskService.listByInboundOrderId(inboundOrderId).stream()
-                .map(PutawayTaskMapper::toDTO)
-                .collect(Collectors.toList());
+        List<PutawayTaskDTO> list = putawayTaskService.listByInboundOrderIdWithDetails(inboundOrderId);
         return ResponseEntity.ok(list);
     }
 
@@ -63,6 +61,18 @@ public class PutawayTaskController {
         return ResponseEntity.ok(updated);
     }
 
+    @PatchMapping("/{taskId}/location")
+    public ResponseEntity<PutawayTaskDTO> updateLocation(@PathVariable Long taskId, @RequestBody LocationBody body) {
+        PutawayTaskDTO updated = PutawayTaskMapper.toDTO(putawayTaskService.updateLocation(taskId, body.getToLocationId()));
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
+        putawayTaskService.deleteTask(taskId);
+        return ResponseEntity.ok().build();
+    }
+
     @Data
     public static class GenerateBody {
         @NotNull
@@ -73,6 +83,12 @@ public class PutawayTaskController {
     @Data
     public static class StartBody {
         private Integer operatorId;
+    }
+
+    @Data
+    public static class LocationBody {
+        @NotNull
+        private Long toLocationId;
     }
 }
 

@@ -38,15 +38,18 @@ public class SecurityConfig {
             // 禁用CSRF保护（API项目通常不需要）
             .csrf(AbstractHttpConfigurer::disable)
             
-            // 配置授权规则（注意：这里的匹配路径不包含 context-path /api）
+            // 配置授权规则
             .authorizeHttpRequests(authz -> authz
-                // 允许访问首页和健康检查接口（在 context-path 去除后匹配）
+                // 允许访问首页和健康检查接口
                 .requestMatchers(HttpMethod.GET, "/", "/health").permitAll()
 
                 // 允许访问H2数据库控制台（仅开发环境）
                 .requestMatchers("/h2-console/**").permitAll()
 
-                // 暂时放开所有API（如需开启认证，改为具体规则或 .authenticated()）
+                // 允许访问所有API接口
+                .requestMatchers("/api/**").permitAll()
+
+                // 暂时放开所有其他请求
                 .anyRequest().permitAll()
             )
             

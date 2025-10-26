@@ -20,7 +20,9 @@ public final class InboundOrderMapper {
         dto.setId(entity.getId());
         dto.setOrderNo(entity.getOrderNo());
         dto.setWarehouseId(entity.getWarehouseId());
+        dto.setWarehouseName(entity.getWarehouse() != null ? entity.getWarehouse().getName() : null);
         dto.setSupplierId(entity.getSupplierId());
+        dto.setSupplierName(entity.getSupplier() != null ? entity.getSupplier().getSupplierName() : null);
         dto.setStatus(entity.getStatus());
         dto.setStatusName(entity.getStatus() != null ? entity.getStatus().getDescription() : null);
         dto.setTotalExpectedQuantity(entity.getTotalExpectedQuantity());
@@ -76,6 +78,7 @@ public final class InboundOrderMapper {
                     item.setBatchNo(itemRequest.getBatchNo());
                     item.setProductionDate(itemRequest.getProductionDate());
                     item.setExpiryDate(itemRequest.getExpiryDate());
+                    // 设置关联关系，JPA会自动设置inboundOrderId
                     item.setInboundOrder(entity);
                     return item;
                 })

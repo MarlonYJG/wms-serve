@@ -23,8 +23,10 @@ public class WarehouseService {
     public Page<Warehouse> page(Integer page, Integer size, String sortBy, String sortDir,
                                 String keyword, String name, String code, Boolean isEnabled,
                                 Long startTime, Long endTime) {
+        // 前端页码从1开始，JPA页码从0开始，需要转换
+        int pageIndex = page == null ? 0 : Math.max(0, page - 1);
         Pageable pageable = PageUtil.createPageable(
-                PageUtil.validatePage(page == null ? PageUtil.DEFAULT_PAGE : page),
+                pageIndex,
                 PageUtil.validateSize(size == null ? PageUtil.DEFAULT_SIZE : size),
                 PageUtil.validateSortBy(sortBy),
                 PageUtil.validateSortDirection(sortDir)

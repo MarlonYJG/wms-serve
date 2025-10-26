@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/inventory")
+@RequestMapping("/api/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
 
@@ -25,9 +27,10 @@ public class InventoryController {
             @RequestParam(required = false) Long productSkuId,
             @RequestParam(required = false) String skuCode,
             @RequestParam(required = false) String batchNo,
-            @RequestParam(required = false) Boolean hasStock
+            @RequestParam(required = false) Boolean hasStock,
+            @RequestParam(required = false) String zoneType
     ) {
-        PageResult<InventoryDTO> result = inventoryService.page(page, size, warehouseId, locationId, productSkuId, skuCode, batchNo, hasStock);
+        PageResult<InventoryDTO> result = inventoryService.page(page, size, warehouseId, locationId, productSkuId, skuCode, batchNo, hasStock, zoneType);
         return ResponseEntity.ok(result);
     }
 
@@ -48,18 +51,27 @@ public class InventoryController {
         return ResponseEntity.ok(updated);
     }
 
+    /**
+     * 根据商品SKU ID和仓库ID查询库存
+     */
+    @GetMapping("/product/{productSkuId}")
+    public ResponseEntity<List<InventoryDTO>> getInventoryByProductSku(
+            @PathVariable Long productSkuId,
+            @RequestParam(required = false) Long warehouseId) {
+        List<InventoryDTO> result = inventoryService.getInventoryByProductSku(productSkuId, warehouseId);
+        return ResponseEntity.ok(result);
+    }
+
     @Data
     public static class AdjustBody {
-        private int quantity;
+        private Integer quantity;
         private String reason;
     }
 
     @Data
     public static class TransferBody {
         private Long toLocationId;
-        private int quantity;
+        private Integer quantity;
         private String reason;
     }
 }
-
-

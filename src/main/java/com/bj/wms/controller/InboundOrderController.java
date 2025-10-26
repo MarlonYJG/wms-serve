@@ -2,10 +2,10 @@ package com.bj.wms.controller;
 
 import com.bj.wms.dto.*;
 import com.bj.wms.service.InboundOrderService;
-import com.bj.wms.util.PageResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ public class InboundOrderController {
      * 分页查询入库单列表
      */
     @GetMapping
-    public ResponseEntity<PageResult<InboundOrderDTO>> getOrderList(
+    public ResponseEntity<Page<InboundOrderDTO>> getOrderList(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String orderNo,
@@ -41,7 +41,7 @@ public class InboundOrderController {
         request.setStartTime(startTime);
         request.setEndTime(endTime);
         
-        PageResult<InboundOrderDTO> result = orderService.getOrderList(request);
+        Page<InboundOrderDTO> result = orderService.getOrderList(request);
         return ResponseEntity.ok(result);
     }
 
@@ -91,6 +91,15 @@ public class InboundOrderController {
             @PathVariable Long id, 
             @Valid @RequestBody ConfirmReceiptRequest request) {
         orderService.confirmReceipt(id, request.getItems());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 强制完成入库单
+     */
+    @PostMapping("/{id}/force-complete")
+    public ResponseEntity<Void> forceCompleteOrder(@PathVariable Long id) {
+        orderService.forceCompleteOrder(id);
         return ResponseEntity.ok().build();
     }
 }
