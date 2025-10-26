@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/outbound-charges")
+@RequestMapping("/outbound-charges")
 @RequiredArgsConstructor
 public class OutboundChargeController {
 

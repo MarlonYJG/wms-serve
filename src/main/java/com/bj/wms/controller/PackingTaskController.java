@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/packing-tasks")
+@RequestMapping("/packing-tasks")
 @RequiredArgsConstructor
 public class PackingTaskController {
 

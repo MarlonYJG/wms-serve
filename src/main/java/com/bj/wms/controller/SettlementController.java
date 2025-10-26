@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/settlements")
+@RequestMapping("/settlements")
 @RequiredArgsConstructor
 public class SettlementController {
 

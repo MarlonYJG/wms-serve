@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/packing-materials")
+@RequestMapping("/packing-materials")
 @RequiredArgsConstructor
 public class PackingMaterialController {
 

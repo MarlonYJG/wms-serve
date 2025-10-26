@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/charge-dict")
+@RequestMapping("/charge-dict")
 @RequiredArgsConstructor
 public class ChargeDictController {
 

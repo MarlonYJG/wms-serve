@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/storage-locations")
+@RequestMapping("/storage-locations")
 @RequiredArgsConstructor
 public class StorageLocationController {
 
