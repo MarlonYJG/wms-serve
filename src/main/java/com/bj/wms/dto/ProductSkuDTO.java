@@ -42,6 +42,26 @@ public class ProductSkuDTO {
 
     private Boolean isEnabled;
 
+    /**
+     * 采购价格
+     */
+    private BigDecimal purchasePrice;
+
+    /**
+     * 成本价格（包含采购价和入库费用分摊）
+     */
+    private BigDecimal costPrice;
+
+    /**
+     * 销售价格
+     */
+    private BigDecimal salePrice;
+
+    /**
+     * 建议零售价
+     */
+    private BigDecimal retailPrice;
+
     private Long createdTime;
 
     private Long updatedTime;

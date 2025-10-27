@@ -62,4 +62,44 @@ public class CustomerController {
         CustomerDTO result = customerService.getCustomerByCode(customerCode);
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * 创建新客户
+     */
+    @PostMapping
+    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO customerDTO) {
+        log.info("创建新客户: {}", customerDTO.getCustomerName());
+        CustomerDTO result = customerService.createCustomer(customerDTO);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 更新客户信息
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customerDTO) {
+        log.info("更新客户信息: ID={}, 名称={}", id, customerDTO.getCustomerName());
+        CustomerDTO result = customerService.updateCustomer(id, customerDTO);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 删除客户
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+        log.info("删除客户: ID={}", id);
+        customerService.deleteCustomer(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 启用/禁用客户
+     */
+    @PutMapping("/{id}/status")
+    public ResponseEntity<CustomerDTO> updateCustomerStatus(@PathVariable Long id, @RequestParam Boolean isEnabled) {
+        log.info("更新客户状态: ID={}, 启用状态={}", id, isEnabled);
+        CustomerDTO result = customerService.updateCustomerStatus(id, isEnabled);
+        return ResponseEntity.ok(result);
+    }
 }

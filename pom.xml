@@ -24,6 +24,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
     
     <!-- 项目依赖 -->
@@ -140,6 +142,14 @@
                 <configuration>
                     <!-- 指定主类 -->
                     <mainClass>com.bj.wms.WmsApplication</mainClass>
+                    <!-- JVM参数 - 解决中文乱码问题 -->
+                    <jvmArguments>
+                        -Dfile.encoding=UTF-8
+                        -Dconsole.encoding=UTF-8
+                        -Duser.language=zh
+                        -Duser.country=CN
+                        -Dlogback.configurationFile=logback-simple.xml
+                    </jvmArguments>
                     <!-- 排除开发时依赖 -->
                     <excludes>
                         <exclude>

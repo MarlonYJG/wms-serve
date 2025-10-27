@@ -24,6 +24,11 @@ public final class ProductSkuMapper {
         dto.setShelfLifeDays(entity.getShelfLifeDays());
         dto.setSafetyStock(entity.getSafetyStock());
         dto.setIsEnabled(entity.getIsEnabled());
+        // 价格字段映射
+        dto.setPurchasePrice(entity.getPurchasePrice());
+        dto.setCostPrice(entity.getCostPrice());
+        dto.setSalePrice(entity.getSalePrice());
+        dto.setRetailPrice(entity.getRetailPrice());
         if (entity.getCreatedTime() != null) {
             dto.setCreatedTime(entity.getCreatedTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
@@ -51,6 +56,11 @@ public final class ProductSkuMapper {
         entity.setShelfLifeDays(dto.getShelfLifeDays());
         entity.setSafetyStock(dto.getSafetyStock());
         entity.setIsEnabled(dto.getIsEnabled() == null ? Boolean.TRUE : dto.getIsEnabled());
+        // 价格字段映射
+        entity.setPurchasePrice(dto.getPurchasePrice());
+        entity.setCostPrice(dto.getCostPrice());
+        entity.setSalePrice(dto.getSalePrice());
+        entity.setRetailPrice(dto.getRetailPrice());
         return entity;
     }
 }

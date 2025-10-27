@@ -19,5 +19,9 @@ public interface CustomerMapper {
     @Mapping(target = "creditRating", expression = "java(entity.getCreditRating() != null ? entity.getCreditRating().name() : null)")
     CustomerDTO toDTO(Customer entity);
 
+    @Mapping(target = "customerType", ignore = true)
+    @Mapping(target = "creditRating", ignore = true)
+    Customer toEntity(CustomerDTO dto);
+
     List<CustomerDTO> toDTOList(List<Customer> entities);
 }

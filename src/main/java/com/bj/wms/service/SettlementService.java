@@ -5,6 +5,7 @@ import com.bj.wms.entity.*;
 import com.bj.wms.mapper.SettlementMapper;
 import com.bj.wms.repository.*;
 import com.bj.wms.util.PageResult;
+import com.bj.wms.util.EncodingTestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -61,10 +62,15 @@ public class SettlementService {
      * 获取结算单详情
      */
     public SettlementDTO getSettlementById(Long id) {
-        Settlement settlement = settlementRepository.findById(id)
+        Settlement settlement = settlementRepository.findByIdWithCustomer(id)
             .orElseThrow(() -> new RuntimeException("结算单不存在"));
 
         SettlementDTO dto = SettlementMapper.INSTANCE.toDTO(settlement);
+        
+        // 设置客户名称
+        if (settlement.getCustomer() != null) {
+            dto.setCustomerName(settlement.getCustomer().getCustomerName());
+        }
         
         // 获取结算明细
         List<SettlementItem> items = settlementItemRepository.findBySettlementIdAndDeletedFalse(id);
@@ -399,6 +405,207 @@ public class SettlementService {
         return totalAmount;
     }
 
+    /**
+     * 计算结算单利润
+     */
+    public SettlementProfitSummaryDTO calculateSettlementProfit(Long settlementId) {
+        // 测试编码（仅在开发环境）
+        if (log.isDebugEnabled()) {
+            EncodingTestUtil.testChineseEncoding();
+        }
+        
+        log.info("开始计算结算单利润，结算单ID: {}", settlementId);
+        
+        // 使用能够加载客户信息的查询
+        Settlement settlement = settlementRepository.findByIdWithCustomer(settlementId)
+            .orElseThrow(() -> new RuntimeException("结算单不存在"));
+        
+        SettlementProfitSummaryDTO summary = new SettlementProfitSummaryDTO();
+        summary.setSettlementId(settlementId);
+        
+        // 获取结算单明细
+        List<SettlementItem> items = settlementItemRepository.findBySettlementIdAndDeletedFalse(settlementId);
+        
+        List<ProfitCalculationDTO> profitItems = new ArrayList<>();
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        BigDecimal totalCosts = BigDecimal.ZERO;
+        
+        for (SettlementItem item : items) {
+            ProfitCalculationDTO profitItem = calculateOrderProfit(item.getOutboundOrderId());
+            profitItem.setSettlementId(settlementId);
+            profitItem.setCustomerId(settlement.getCustomerId());
+            
+            // 设置客户名称
+            if (settlement.getCustomer() != null) {
+                profitItem.setCustomerName(settlement.getCustomer().getCustomerName());
+            }
+            
+            profitItems.add(profitItem);
+            
+            totalRevenue = totalRevenue.add(profitItem.getRevenue().getTotalRevenue());
+            totalCosts = totalCosts.add(profitItem.getCosts().getTotalCosts());
+        }
+        
+        summary.setItems(profitItems);
+        summary.setTotalRevenue(totalRevenue);
+        summary.setTotalCosts(totalCosts);
+        summary.setTotalProfit(totalRevenue.subtract(totalCosts));
+        summary.setItemCount(items.size());
+        
+        // 计算平均利润率
+        if (totalRevenue.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal averageMargin = summary.getTotalProfit()
+                .divide(totalRevenue, 4, BigDecimal.ROUND_HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+            summary.setAverageProfitMargin(averageMargin);
+        } else {
+            summary.setAverageProfitMargin(BigDecimal.ZERO);
+        }
+        
+        log.info("结算单利润计算完成，总收入: {}, 总成本: {}, 总利润: {}", 
+                totalRevenue, totalCosts, summary.getTotalProfit());
+        
+        return summary;
+    }
+    
+    /**
+     * 计算单个出库单利润
+     */
+    public ProfitCalculationDTO calculateOrderProfit(Long outboundOrderId) {
+        log.info("开始计算出库单利润，出库单ID: {}", outboundOrderId);
+        
+        OutboundOrder order = outboundOrderRepository.findByIdWithItems(outboundOrderId)
+            .orElseThrow(() -> new RuntimeException("出库单不存在"));
+        
+        ProfitCalculationDTO profit = new ProfitCalculationDTO();
+        profit.setOutboundOrderId(outboundOrderId);
+        profit.setCustomerId(order.getCustomerId());
+        
+        // 设置客户名称
+        if (order.getCustomer() != null) {
+            profit.setCustomerName(order.getCustomer().getCustomerName());
+        } else {
+            // 如果出库单没有关联客户信息，通过客户ID查询
+            Customer customer = customerRepository.findById(order.getCustomerId()).orElse(null);
+            if (customer != null) {
+                profit.setCustomerName(customer.getCustomerName());
+            }
+        }
+        
+        // 初始化收入和成本对象
+        ProfitCalculationDTO.RevenueDTO revenue = new ProfitCalculationDTO.RevenueDTO();
+        ProfitCalculationDTO.CostsDTO costs = new ProfitCalculationDTO.CostsDTO();
+        ProfitCalculationDTO.ProfitDTO profitCalc = new ProfitCalculationDTO.ProfitDTO();
+        
+        // 计算收入
+        calculateRevenue(outboundOrderId, revenue);
+        
+        // 计算成本
+        calculateCosts(outboundOrderId, costs);
+        
+        // 计算利润
+        profitCalc.setGrossProfit(revenue.getTotalRevenue().subtract(costs.getTotalCosts()));
+        
+        // 计算利润率
+        if (revenue.getTotalRevenue().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal margin = profitCalc.getGrossProfit()
+                .divide(revenue.getTotalRevenue(), 4, BigDecimal.ROUND_HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+            profitCalc.setProfitMargin(margin);
+        } else {
+            profitCalc.setProfitMargin(BigDecimal.ZERO);
+        }
+        
+        // 净利润暂时等于毛利润（后续可扣除税费等）
+        profitCalc.setNetProfit(profitCalc.getGrossProfit());
+        
+        profit.setRevenue(revenue);
+        profit.setCosts(costs);
+        profit.setProfit(profitCalc);
+        
+        log.info("出库单利润计算完成，总收入: {}, 总成本: {}, 毛利润: {}, 利润率: {}%", 
+                revenue.getTotalRevenue(), costs.getTotalCosts(), 
+                profitCalc.getGrossProfit(), profitCalc.getProfitMargin());
+        
+        return profit;
+    }
+    
+    /**
+     * 批量计算利润
+     */
+    public List<SettlementProfitSummaryDTO> batchCalculateProfit(List<Long> settlementIds) {
+        log.info("开始批量计算利润，结算单数量: {}", settlementIds.size());
+        
+        List<SettlementProfitSummaryDTO> results = new ArrayList<>();
+        
+        for (Long settlementId : settlementIds) {
+            try {
+                SettlementProfitSummaryDTO summary = calculateSettlementProfit(settlementId);
+                results.add(summary);
+            } catch (Exception e) {
+                log.error("计算结算单利润失败，结算单ID: {}, 错误: {}", settlementId, e.getMessage());
+                // 继续处理其他结算单
+            }
+        }
+        
+        log.info("批量计算利润完成，成功计算: {} 个结算单", results.size());
+        return results;
+    }
+    
+    /**
+     * 计算收入
+     */
+    private void calculateRevenue(Long outboundOrderId, ProfitCalculationDTO.RevenueDTO revenue) {
+        // 商品收入 = 出库单明细的商品金额
+        BigDecimal goodsAmount = calculateOutboundOrderGoodsAmount(outboundOrderId);
+        revenue.setGoodsAmount(goodsAmount);
+        
+        // 服务收入 = 出库单费用
+        BigDecimal serviceAmount = BigDecimal.valueOf(
+            outboundChargeRepository.sumAmountByOutboundOrderId(outboundOrderId));
+        revenue.setServiceAmount(serviceAmount);
+        
+        // 总收入
+        revenue.setTotalRevenue(goodsAmount.add(serviceAmount));
+    }
+    
+    /**
+     * 计算成本
+     */
+    private void calculateCosts(Long outboundOrderId, ProfitCalculationDTO.CostsDTO costs) {
+        // 获取出库单明细
+        List<OutboundOrderItem> items = outboundOrderItemRepository.findByOutboundOrderIdAndDeletedFalse(outboundOrderId);
+        
+        BigDecimal goodsCost = BigDecimal.ZERO;
+        BigDecimal storageCost = BigDecimal.ZERO;
+        BigDecimal handlingCost = BigDecimal.ZERO;
+        BigDecimal shippingCost = BigDecimal.ZERO;
+        BigDecimal otherCosts = BigDecimal.ZERO;
+        
+        for (OutboundOrderItem item : items) {
+            if (item.getProductSku() != null && item.getQuantity() != null) {
+                // 商品成本 = 数量 × 成本价格
+                BigDecimal itemCost = item.getProductSku().getCostPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+                goodsCost = goodsCost.add(itemCost);
+                
+                // TODO: 这里可以根据实际业务需求计算其他成本
+                // 例如：仓储成本、操作成本、运输成本等
+                // 目前暂时设为0，后续可以根据实际业务规则计算
+            }
+        }
+        
+        costs.setGoodsCost(goodsCost);
+        costs.setStorageCost(storageCost);
+        costs.setHandlingCost(handlingCost);
+        costs.setShippingCost(shippingCost);
+        costs.setOtherCosts(otherCosts);
+        
+        // 总成本
+        costs.setTotalCosts(goodsCost.add(storageCost).add(handlingCost)
+            .add(shippingCost).add(otherCosts));
+    }
+    
     /**
      * 生成结算单号
      */

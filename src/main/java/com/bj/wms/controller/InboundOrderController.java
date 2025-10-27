@@ -27,7 +27,7 @@ public class InboundOrderController {
             @RequestParam(required = false) String orderNo,
             @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) Long supplierId,
-            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
         
@@ -37,7 +37,14 @@ public class InboundOrderController {
         request.setOrderNo(orderNo);
         request.setWarehouseId(warehouseId);
         request.setSupplierId(supplierId);
-        request.setStatus(status);
+        // 将字符串类型的status转换为Integer
+        if (status != null && !status.trim().isEmpty()) {
+            try {
+                request.setStatus(Integer.parseInt(status));
+            } catch (NumberFormatException e) {
+                log.warn("Invalid status format: {}", status);
+            }
+        }
         request.setStartTime(startTime);
         request.setEndTime(endTime);
         

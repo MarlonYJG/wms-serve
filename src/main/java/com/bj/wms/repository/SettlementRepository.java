@@ -55,4 +55,10 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
      * 检查结算单号是否存在
      */
     boolean existsBySettlementNoAndDeletedFalse(String settlementNo);
+    
+    /**
+     * 根据ID查询结算单（包含客户信息）
+     */
+    @Query("SELECT s FROM Settlement s LEFT JOIN FETCH s.customer WHERE s.id = :id")
+    Optional<Settlement> findByIdWithCustomer(@Param("id") Long id);
 }

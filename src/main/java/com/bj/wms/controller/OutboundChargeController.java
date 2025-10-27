@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -38,8 +39,25 @@ public class OutboundChargeController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         
-        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime) : null;
-        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime) : null;
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+        
+        // 安全解析时间参数
+        if (startTime != null && !startTime.trim().isEmpty()) {
+            try {
+                start = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            } catch (Exception e) {
+                log.warn("Invalid startTime format: {}", startTime);
+            }
+        }
+        
+        if (endTime != null && !endTime.trim().isEmpty()) {
+            try {
+                end = LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            } catch (Exception e) {
+                log.warn("Invalid endTime format: {}", endTime);
+            }
+        }
         
         Page<OutboundChargeDTO> pageResult = outboundChargeService.getChargeList(
             outboundOrderId, outboundOrderNo, chargeType, start, end, page, size);

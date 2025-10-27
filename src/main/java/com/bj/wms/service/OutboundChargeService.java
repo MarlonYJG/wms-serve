@@ -35,7 +35,11 @@ public class OutboundChargeService {
     public Page<OutboundChargeDTO> getChargeList(Long outboundOrderId, String outboundOrderNo, Long chargeType, 
                                                LocalDateTime startTime, LocalDateTime endTime,
                                                Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        // 确保分页参数有效
+        int validPage = Math.max(1, page);
+        int validSize = Math.max(1, Math.min(1000, size)); // 限制最大页面大小为1000
+        Pageable pageable = PageRequest.of(validPage - 1, validSize);
+        
         Page<OutboundCharge> pageResult = outboundChargeRepository.findCharges(
             outboundOrderId, outboundOrderNo, chargeType, startTime, endTime, pageable);
         

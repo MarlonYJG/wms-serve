@@ -124,4 +124,31 @@ public class SettlementController {
         PageResult<OutboundOrderDTO> result = settlementService.getAllSettlableOutboundOrders(request);
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * 计算结算单利润
+     */
+    @GetMapping("/{id}/profit")
+    public ResponseEntity<SettlementProfitSummaryDTO> calculateSettlementProfit(@PathVariable Long id) {
+        SettlementProfitSummaryDTO result = settlementService.calculateSettlementProfit(id);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 计算单个出库单利润
+     */
+    @GetMapping("/order/{orderId}/profit")
+    public ResponseEntity<ProfitCalculationDTO> calculateOrderProfit(@PathVariable Long orderId) {
+        ProfitCalculationDTO result = settlementService.calculateOrderProfit(orderId);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 批量计算利润
+     */
+    @PostMapping("/batch-profit")
+    public ResponseEntity<List<SettlementProfitSummaryDTO>> batchCalculateProfit(@RequestBody List<Long> settlementIds) {
+        List<SettlementProfitSummaryDTO> result = settlementService.batchCalculateProfit(settlementIds);
+        return ResponseEntity.ok(result);
+    }
 }

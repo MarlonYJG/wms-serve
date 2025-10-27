@@ -34,7 +34,7 @@ public interface OutboundChargeRepository extends JpaRepository<OutboundCharge, 
            "LEFT JOIN FETCH oc.chargeDict " +
            "WHERE oc.deleted = 0 " +
            "AND (:outboundOrderId IS NULL OR oc.outboundOrderId = :outboundOrderId) " +
-           "AND (:outboundOrderNo IS NULL OR oc.outboundOrder.orderNo LIKE %:outboundOrderNo%) " +
+           "AND (:outboundOrderNo IS NULL OR :outboundOrderNo = '' OR oc.outboundOrder.orderNo LIKE CONCAT('%', :outboundOrderNo, '%')) " +
            "AND (:chargeType IS NULL OR oc.chargeType = :chargeType) " +
            "AND (:startTime IS NULL OR oc.createdTime >= :startTime) " +
            "AND (:endTime IS NULL OR oc.createdTime <= :endTime)")

@@ -48,7 +48,12 @@ logging:
   file:
     name: logs/wms-backend.log
   pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  # 设置日志输出编码，避免控制台中文乱码
+  charset:
+    console: UTF-8
+    file: UTF-8
 
 # 生产环境JWT配置（使用环境变量）
 wms:
